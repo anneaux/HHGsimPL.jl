@@ -1,0 +1,13 @@
+name = "HHGsimPL"
+uuid = "2ff5608f-73e4-438b-aa3f-657adca1e2ed"
+authors = ["anneaux <anne.weber@mailbox.org> and contributors"]
+version = "1.0.0-DEV"
+
+[compat]
+julia = "1.6.7"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
