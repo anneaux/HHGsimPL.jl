@@ -1,4 +1,8 @@
 ## volkov action
+Fv = field_amplitude(field, t)
+Av = vector_potential(field, t)
+
+
 
 ## exponent = action
 
@@ -16,7 +20,7 @@
 
 
 ## stationary momentum
-
+function p_st(field::)
 
 ## speq1 
 

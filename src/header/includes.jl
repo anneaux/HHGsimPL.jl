@@ -8,3 +8,4 @@ using ElectricFields
 using Unitful
 using UnitfulAtomic
 
+include("fields.jl")
