@@ -52,7 +52,9 @@ end;
 
 
 
-
+scalarproduct(a::Vector{},b::Vector{}) = sum( a .* b )
+scalarproduct(a::Vector{}) = scalarproduct(a,a)
+scalarproduct2(a::Vector{}) = scalarproduct(a,a)
 
 
 

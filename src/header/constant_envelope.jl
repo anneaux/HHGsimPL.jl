@@ -1,3 +1,4 @@
+### kudos Stefanos 
 using Parameters
 using IntervalSets
 
@@ -51,3 +52,5 @@ end
 
 # This is formally correct, but not very useful
 time_bandwidth_product(::ConstantEnvelope) = Inf;
+
+

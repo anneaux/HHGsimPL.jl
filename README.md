@@ -5,5 +5,5 @@
 
 
 
-- We're using the Electric Fields package to define our laser beams, documention here: https://www.tipota.org/ElectricFields.jl/previews/PR32/
+- We're NOT YET using the Electric Fields package to define our laser beams, documention here: https://www.tipota.org/ElectricFields.jl/previews/PR32/
 
