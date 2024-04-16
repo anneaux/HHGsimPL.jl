@@ -11,7 +11,10 @@ Pkg.activate("..")
 # include("fields.jl")
 
 using QuadGK
+using NLsolve
 
 include("utils.jl")
 include("beams.jl")
+
+include("equations.jl")
 

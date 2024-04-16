@@ -1,5 +1,12 @@
 abstract type Beam end
 
+# TC(lambda::Int64) = 2*pi/get_omega(lambda)
+TCycle(;lambda::Real) = lambda / (LAU * c)
+TCycleNU(;lambda::Real) = lambda * 1e-9/cNU
+get_omega(lambda::Real) = 2 * pi * LAU * c / lambda
+
+
+
 function field_amplitude(vec::Vector{T}) where T <: Real
 	return sqrt(sum(vec.^2))
 end
@@ -53,7 +60,6 @@ function BeamBEOTC(;Intensity1::Real, Intensity2::Real,
 end
 
 TCycle(b::BeamOTC) = 2*pi/b.omega1
-
 
 #### field equations ###########
 

@@ -120,8 +120,6 @@ end
   d2S_dtr2(b::Beam, Ip::Float64, ti::ComplexF64, tr::ComplexF64) = d2Sv_dtr2(b::Beam, ti::ComplexF64, tr::ComplexF64)
 
 
-
-
 ### third drv of the action
 # TODO 
 

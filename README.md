@@ -5,5 +5,10 @@
 
 
 
-- We're NOT YET using the Electric Fields package to define our laser beams, documention here: https://www.tipota.org/ElectricFields.jl/previews/PR32/
 
+### TO DO
+- write documentation
+- use the Electric Fields package to define the laser beams, see documentation here: https://www.tipota.org/ElectricFields.jl/previews/PR32/
+- implement other methods to make sure all saddle points are found
+- implement necklace code --> how to choose flow parameters?
+- consistent code formatting
