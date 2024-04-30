@@ -106,7 +106,7 @@ function find_saddles_sobol(q::Number;
             in(tiSP, ti_cd) && # maybe I want this to be an option
             in(trSP,tr_cd)
             # &&new
-            push!(saddles, Saddle(q, tiSP, trSP, p_fun(b, tiSP,trSP)))
+            push!(saddles, Saddle(q, tiSP, trSP, p_stationary(b, tiSP, trSP)))
         end
 	end
 
@@ -114,4 +114,4 @@ function find_saddles_sobol(q::Number;
 
     sort!(saddles, by = x -> real(x.ti))
 	return saddles
-end
+end;

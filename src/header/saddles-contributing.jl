@@ -1,75 +1,125 @@
-# ### everything to decide whether or not a given saddle point contributes.
-# ### this could be implemented in various methods again. Also maybe it should give a warning if there're multiple saddle points nearby and if a Gaussian approximation is a bad idea?
+### everything to decide whether or not a given saddle point contributes.
+### this could be implemented in various methods again. Also maybe it should give a warning if there're multiple saddle points nearby and if a Gaussian approximation is a bad idea?
 
 
 
-# ### necklace code
-# # gradient()
-# mutable struct Simplex{T}
-# 	const t1::T
-# 	const t2::T where T <:Number
-# 	active::Bool
-# end
 
+### utils for deciding whether a line crosses a given point
+	function distance_point_to_line(p::AbstractVector, s::AbstractVector, t::AbstractVector)
+	    midpoint = (s .+ t)./2
+	    return norm(p .- midpoint)
+	end
 
+	function distance_point_to_line(p::Point, l::LineSeg)
+	    return distance_point_to_line([p.x,p.y], [l.s.x, l.s.y], [l.e.x, l.e.y])
+	end
 
-# # using LinearAlgebra
+	function find_crossing(line::Vector{LineSeg}, point::Point{T}, tolerance::Float64=0.75) where T<:Real
+	    mindist, index = findmin([distance_point_to_line(point, seg) for seg in line])
+	    if mindist < tolerance
+	        return index
+	    else 
+	        return nothing
+	    end
+	end
 
-# # function Necklace(qx, Rx, Φx; ts, NN=10, ϵ=0.01, δ=0.05, Δ=0.5)
-# #     gradN(q, R, Φ, a) = normalize(conj.(complex(D[I * action(q, R, Φ, a), [a1, a2]])))
+	function find_crossing(curve::Curve2{Tuple{T, T}}, point::Point{T}, tolerance::Float64=0.75) where T<:Real
+	    line = [LineSeg( Point(curve.vertices[i]...), Point(curve.vertices[i+1]...)) for i in 1:(length(curve.vertices)-1) ]
+	    return find_crossing(line, point, tolerance)
+	end
+
+	function find_crossing(nocurve::Missing, point::Point{T}, tolerance::Float64=0.75) where T<:Real
+	    return nothing
+	end
+
+### calculating the contour line through a given saddle
+function contourline_through_saddle(b::Beam, Ip::Float64,
+	q::Number,
+	ti::ComplexF64, tr::ComplexF64,
+    ti_cd::ComplexDomain, tr_cd::ComplexDomain
+    ; Ntimes = 100)    
     
-# #     counter = 0
-# #     while counter < 500
-# #         counter += 1
-# #         tmp = deepcopy(necklace)
-# #         for i in 1:length(necklace)
-# #             if real(I * action(qx, Rx, Φx, necklace[i])) < 0
-# #                 necklace[i] += δ * gradN(qx, Rx, Φx, necklace[i])
-# #             end
-# #         end
-# #         for i in 1:length(necklace)-1
-# #             if norm(necklace[i] - necklace[i+1]) > Δ
-# #                 insert!(necklace, i+1, (necklace[i] + necklace[i+1]) / 2)
-# #             end
-# #         end
-# #         if necklace == tmp
-# #             break
-# #         end
-# #     end
-# #     return necklace
-# # end
+    TC = TCycle(b)
+    tir_values = range(real(ti)- 0.5TC, stop = real(ti) + 0.5TC, length = Ntimes)
+    tii_values = range(-1., stop = imag(ti) + 0.25TC, length = Ntimes)
+    trr_values = range(real(tr)- 0.5TC, stop = real(tr) + 0.5TC, length = Ntimes)
+    tri_values = range(-1., stop = imag(ti) + 0.25TC, length = Ntimes) 
 
+    ### level line for the saddle point
+    S_values = [-1im*S(b, Ip, complex(tir), complex(trr), q) for tir in tir_values, trr in trr_values]
+    S_saddle = -1im*S(b, Ip, ti, tr, q)
+    contour_saddle = Contour.contour(tir_values, trr_values, imag.(S_values), imag(S_saddle) )
 
-
-
-
-# ### initialise
-# # function initialise_necklace(beam, NN::Int64=50)
-# #     hess(q, R, Φ, a) = begin
-# #         ∇²action = Complex(diff(re(action(q, R, Φ, [u1 + v1*im, u2 + v2*im]))), [u1, v1, u2, v2])
-# #         hess_matrix = complex(diff(∇²action, [u1, v1, u2, v2], [u1, v1, u2, v2]))
-# #         return hess_matrix
-# #     end
+    if length(contour_saddle.lines) != 1
+        println("Careful! There's more than one or no level line going through the saddle point for $b at q $q.")
+        # I should check if the contour runs through the SP
+    end
     
-# #     eigensystem = eig(hess(qx, Rx, Φx, ts))
-# #     sorted_eigensystem = eigensystem.vectors[:, sortperm(real.(eigensystem.values))]
-# #     for i in 1:length(sorted_eigensystem)
-# #         sorted_eigensystem[:, i] = toComplex(normalize(sorted_eigensystem[:, i]))
-# #     end
+    if length(contour_saddle.lines) >= 1
+        return contour_saddle.lines[1]
+    else
+        return missing
+    end
+end
+
+function contourline_through_saddle(b::Beam, Ip::Float64,
+	s::Saddle,
+    ti_cd::ComplexDomain, tr_cd::ComplexDomain
+    ; Ntimes = 100) 
+
+    contourline_through_saddle(b, Ip, s.q, s.ti, s.tr, ti_cd, tr_cd; Ntimes = Ntimes) 
+end
+
+### checking if conditions are fulfilled
+function check_contribution(necklace::Vector{LineSeg}, 
+    b::Beam, Ip::Float64,
+    q::Number,
+    ti::ComplexF64, tr::ComplexF64,
+    ti_cd::ComplexDomain, tr_cd::ComplexDomain
+    ; Ntimes = 100 )
     
-# #     necklace = [ts .+ ϵ * (cos(θ) * sorted_eigensystem[:, 3] + sin(θ) * sorted_eigensystem[:, 4]) for θ in range(0, stop=2π, length=NN+1)]
+    ### check if necklace hits real plane
+    p = Point(0.,0.)
+    idx = find_crossing( imag.(necklace), p)
+    
+    if isnothing(idx)
+       println("it doesn't contribute! (1)")
+       active = false
+    else         
+        ### get the point where it hits & check if it's in the integration domain
+        hitting_point = real(necklace[idx].s.y) > real(necklace[idx].s.x) ? 
+            get_point(real(necklace[idx])) : nothing
+        # mustn't use the starting point here, could use the centre point!
+        
+        if isnothing(hitting_point)
+           println("it doesn't contribute! (2)")
+           active = false
+        else
+            ### check if the contour runs through that point
+            contourline = contourline_through_saddle(b, Ip, q, ti, tr, ti_cd, tr_cd )
+            
+            if isnothing(find_crossing(contourline, hitting_point))
+                println("it doesn't contribute! (3)")
+                active = false
+            else 
+                println("it contributes!")
+                active = true
+            end
+        end
+    end
+    return active
+end
 
-# #     return necklace
-# # end
 
 
+function check_contribution(b::Beam, Ip::Float64,
+	q::Number,
+	ti::ComplexF64, tr::ComplexF64,
+    ti_cd::ComplexDomain, tr_cd::ComplexDomain
+    ; Ntimes = 100, Ncounter = 600)
 
-# ### subdevide
-
-
-
-# ### flow
-
-
-
-# ### clean
+    necklace = get_necklace(b, Ip, q, ti, tr, Ncounter = Ncounter)
+    # what happens if doesn't converge?
+        
+    check_contribution(necklace, b, Ip, q, ti, tr, ti_cd, tr_cd, Ntimes = Ntimes)
+end

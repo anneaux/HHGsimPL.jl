@@ -90,8 +90,8 @@ end
 
 function find_thcs_sobol(b::Beam, Ip::Real,
         ti_cd::ComplexDomain, 
-        tr_cd::ComplexDomain = ComplexDomain(real(ti_cd.min) - imag(ti_cd.max)*im,ti_cd.max + TCycle(b)),
-        N::Int64=20; tt_minimal::Float64 = 0.15,
+        tr_cd::ComplexDomain = ComplexDomain(real(ti_cd.min) - imag(ti_cd.max)*im,ti_cd.max + TCycle(b));
+        N::Int64=100, tt_minimal::Float64 = 0.15,
         beam::Beam=b # just for clarity
         )
     
