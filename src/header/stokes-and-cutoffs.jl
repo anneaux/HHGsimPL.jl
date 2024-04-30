@@ -1,6 +1,6 @@
 ### everything related to the cutoff and the Stokes phenomena
 
-
+# TODO I should make this more general, because not every fold point should be referred to as a 'harmonic cutoff'. E.g what about the 'lower cutoffs'?
 
 ###### Thc ########### 
 # harmonic cutoff times, i.e. solutions to the second derivative
@@ -18,13 +18,10 @@ Base.show(io::IO, thc::Thc) = println(io,
     "tihc: $(round((thc.tihc),sigdigits=5)), trhc: $(round((thc.trhc),sigdigits=5)), qhc: $(round((thc.qhc),sigdigits=5))")
 
 
-
-
-
 ### thc equations ###########
 
 function thceq1(b::Beam, Ip::Float64,
-  ti::ComplexF64, tr::ComplexF64) ### derived from eq. 15
+  ti::ComplexF64, tr::ComplexF64) ### derived from eq. 15 in Emilio's paper
 
   return d2Sv_dtr2(b, Ip, ti,tr) * d2Sv_dti2(b, Ip, ti,tr) - d2Sv_dtitr(b, Ip, ti,tr) * d2Sv_dtitr(b, Ip, ti,tr)
 end
@@ -39,13 +36,14 @@ function thceq2(b::Beam, Ip::Float64,
 end   
 
 
-########### cutoff energy / harmonic order 
+### cutoff energy 
 function E_hc(b::Beam, Ip::Float64,
   tihc::ComplexF64,trhc::ComplexF64)
   return dSv_dtr(b, Ip, tihc, trhc)
 end
 E_hc(b::Beam, Ip::Float64, thc::Thc) = E_hc(b,Ip,thc,tihc,thc.trhc)
 
+### harmonic order 
 function thc_qc(b::Beam, Ip::Float64,
   tihc::ComplexF64,trhc::ComplexF64)
   return E_hc(b,Ip,tihc,trhc)/b.omega1
@@ -59,7 +57,7 @@ thc_qc(b::Beam, Ip::Float64, thc::Thc) = thc_qc(b, Ip, thc.tihc, thc.trhc)
 
 function solve_Thceqs(t0::Vector{T}, 
     b::Beam, Ip::Real,
-    roundDigits::Int64=5) where T <: Real#t0= Array
+    roundDigits::Int64=5) where T <: Real
 
     try
     ### using NLSolve
@@ -74,12 +72,15 @@ function solve_Thceqs(t0::Vector{T},
         end
 
         result = nlsolve(thceqs!, t0)#, method = :trust_region, factor =fac )#, ftol = 1e-13)#, method = :anderson)
-
-        tiSP = result.zero[1] + im*result.zero[2]
-        trSP = result.zero[3] + im*result.zero[4]
-        tiSP = round(tiSP, digits = roundDigits)
-        trSP = round(trSP, digits = roundDigits)
-        return tiSP, trSP
+        if converged(result)
+            tiSP = result.zero[1] + im*result.zero[2]
+            trSP = result.zero[3] + im*result.zero[4]
+            tiSP = round(tiSP, digits = roundDigits)
+            trSP = round(trSP, digits = roundDigits)
+            return tiSP, trSP
+        else 
+            return nothing,nothing
+        end
     catch e
         println("Error in solve_Thceqs(): $e")
         return nothing,nothing

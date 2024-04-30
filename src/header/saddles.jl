@@ -12,7 +12,6 @@ struct Saddle <: SP
 	ti::Complex{Float64}
 	tr::Complex{Float64}
 	p::Vector{ComplexF64} # do I want this here???
-
 end
 
 Base.show(io::IO, s::Saddle) = print(io,
@@ -30,7 +29,7 @@ function solve_SPEqs(q::Number, t0::Vector{T}, b::Beam, Ip::Real,
     roundDigits::Int64=5) where T <: Real
 
     try
-    ### using NLSolve
+    ### using NLsolve
         function speqs!(F, x)
             F[1] = real(speq1(b, Ip, x[1], x[2], x[3], x[4]))
             F[2] = real(speq2(b, Ip, q, x[1], x[2], x[3], x[4]))
@@ -84,12 +83,12 @@ function find_saddles_sobol(q::Number;
         b::Beam, Ip::Real,
         ti_cd::ComplexDomain, 
         tr_cd::ComplexDomain = ComplexDomain(real(ti_cd.min) - imag(ti_cd.max)*im,ti_cd.max + TCycle(b)),
-        N::Int64=30, # number of seeds generated per domain
+        N::Int64=200, # number of seeds generated per domain
         tt_minimal::Float64 = 0.005,
         beam::Beam=b ) 
-    roundDigits = 2
+    roundDigits = 2 # I should certainly think this over it seems too much
 
-	SP_array = Vector{Saddle}()
+	saddles = Vector{Saddle}()
     
     ti_seq = SobolSeq(reim(ti_cd.min),reim(ti_cd.max))
     tr_seq = SobolSeq(reim(tr_cd.min),reim(tr_cd.max))
@@ -102,17 +101,17 @@ function find_saddles_sobol(q::Number;
 
         tiSP, trSP = solve_SPEqs(q, t0, beam, Ip, roundDigits) 
 
-        ### check conditions and zwischen-store in array
+        ### check conditions and deposit in array
         if check_sp(b, tiSP,trSP, tt_minimal = tt_minimal) == true && 
-            in(tiSP, ti_cd) && 
+            in(tiSP, ti_cd) && # maybe I want this to be an option
             in(trSP,tr_cd)
             # &&new
-            push!(SP_array, Saddle(q, tiSP, trSP, p_fun(b, tiSP,trSP)))
+            push!(saddles, Saddle(q, tiSP, trSP, p_fun(b, tiSP,trSP)))
         end
 	end
 
-    unique!( s -> round.([s.tr,s.ti], digits=roundDigits), SP_array)
+    unique!( s -> round.([s.tr,s.ti], digits=roundDigits), saddles)
 
-    sort!(SP_array, by = x -> real(x.ti))
-	return SP_array
+    sort!(saddles, by = x -> real(x.ti))
+	return saddles
 end

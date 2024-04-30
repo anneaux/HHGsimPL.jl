@@ -42,7 +42,7 @@ function +(cd1::ComplexDomain,cd2::ComplexDomain)
     return ComplexDomain(rmin,rmax,imin,imax)
 end
 
-function +(cd1::ComplexDomain,z::Number) # this function shifts the whole domain by the number specified
+function +(cd1::ComplexDomain, z::Number) # this function shifts the whole domain by the number specified
     
     rmin = real(cd1.min) + real(z)
     rmax = real(cd1.max) + real(z)
@@ -52,15 +52,15 @@ function +(cd1::ComplexDomain,z::Number) # this function shifts the whole domain
     return ComplexDomain(rmin,rmax,imin,imax)
 end
 
-function *(cd1::ComplexDomain,z::Real) # this function shifts the whole domain by the number specified
+# function *(cd1::ComplexDomain, z::Real) # this function multiplies the whole domain by the number specified. Don't know if a function like this makes sense at all
     
-    rmin = real(cd1.min) * z
-    rmax = real(cd1.max) * z
-    imin = imag(cd1.min) * z
-    imax = imag(cd1.max) * z
+#     rmin = real(cd1.min) * z
+#     rmax = real(cd1.max) * z
+#     imin = imag(cd1.min) * z
+#     imax = imag(cd1.max) * z
     
-    return ComplexDomain(rmin,rmax,imin,imax)
-end;
+#     return ComplexDomain(rmin,rmax,imin,imax)
+# end;
 
 function in(z::Complex,cd::ComplexDomain)
     return (real(cd.min) <= real(z) < real(cd.max) ) && (imag(cd.min) <= imag(z) < imag(cd.max) )
@@ -70,10 +70,6 @@ end;
 ##########################################
 
 
-
-scalarproduct(a::Vector{},b::Vector{}) = sum( a .* b )
+scalarproduct(a::Vector{}, b::Vector{}) = sum( a .* b )
 scalarproduct(a::Vector{}) = scalarproduct(a,a)
 scalarproduct2(a::Vector{}) = scalarproduct(a,a)
-
-
-

@@ -5,8 +5,10 @@ function p_stationary(b::Beam,
     -1/(tr-ti) * IA(b)(ti,tr)
 end
 
+### a comment on the square here to resolve my insecurities once and for all:
+# what I want is a 'fake' scalar product, that takes the total of the element-wise product of the two vectors. I think this is because originally we weren't thinking of it to be in the complex plane, hence we don't use a proper dot product (which would be sum(conj(zvec) .* zvec)) ).
 
-## volkov action
+## Volkov action
 function S_v(b::Beam, Ip::Float64, 
   ti::ComplexF64, tr::ComplexF64, 
   p::Vector{ComplexF64} = p_stationary(b, ti, tr)
@@ -23,7 +25,7 @@ function S(b::Beam, Ip::Float64,
   p::Vector{ComplexF64} = p_stationary(b, ti, tr)
   )
   
-  S_v(b, Ip, ti, tr , p) - q* b.omega1 * tr
+  S_v(b, Ip, ti, tr , p) - q * b.omega1 * tr
 
 end 
 
@@ -103,7 +105,7 @@ function d2Sv_dtitr(b::Beam,
     + inv_tau *inv_tau * scalarproduct2(integral)
     )
 
-end 
+end
 
 
 ### just for consistency in the code
@@ -124,7 +126,9 @@ end
 # TODO 
 
 
-## Saddle point equations (SPEQs) 
+## Saddle point equations (SPEQs)
+
+
 # this is actually just S_V_drv(p,ti)
 function speq1(b::Beam, Ip::Float64,
   tir::Float64, tii::Float64, trr::Float64, tri::Float64
@@ -144,10 +148,9 @@ function speq2(b::Beam, Ip::Float64,
   tir::Float64, tii::Float64, trr::Float64, tri::Float64
   )
   ti = tir + im * tii
-  tr = trr + im * tri
-  
+  tr = trr + im * tri  
 
-  0.5* scalarproduct2( p_stationary(b, ti, tr) + A(b)(tr) ) .+ Ip .- q * b.omega1
+  0.5 * scalarproduct2( p_stationary(b, ti, tr) + A(b)(tr) ) .+ Ip .- q * b.omega1
 end 
 
 speq2(b::Beam, Ip::Float64, q::Number, ti::ComplexF64, tr::ComplexF64) = speq2(b, Ip, q, real(ti),imag(ti),real(tr),imag(tr))

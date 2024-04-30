@@ -43,11 +43,6 @@
 
 
 
-
-
-
-
-
 # ### initialise
 # # function initialise_necklace(beam, NN::Int64=50)
 # #     hess(q, R, Φ, a) = begin

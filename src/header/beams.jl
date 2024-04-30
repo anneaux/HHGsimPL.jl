@@ -6,14 +6,14 @@ TCycleNU(;lambda::Real) = lambda * 1e-9/cNU
 get_omega(lambda::Real) = 2 * pi * LAU * c / lambda
 
 
-
 function field_amplitude(vec::Vector{T}) where T <: Real
 	return sqrt(sum(vec.^2))
 end
 
 
 
-#### struct and constructors ###########
+#### struct and constructors #######
+### these are two beams with orthogonal major polarisation axes.
 struct BeamOTC <: Beam
 	E01::Float64
 	E02::Float64
@@ -62,8 +62,6 @@ end
 TCycle(b::BeamOTC) = 2*pi/b.omega1
 
 #### field equations ###########
-
-
 function electric_field(b::BeamOTC)
 	## Beam Characterization from milo2020biell
 	phi = b.phi
@@ -159,6 +157,3 @@ function electric_field_amplitude_derivative(b::BeamOTC)
 
     return t -> (numerator(t) / denominator(t))
 end
-
-
-

@@ -8,7 +8,8 @@
 
 ### TO DO
 - write documentation
-- use the Electric Fields package to define the laser beams, see documentation here: https://www.tipota.org/ElectricFields.jl/previews/PR32/
-- implement other methods to make sure all saddle points are found
+- use the Electric Fields package to define the laser beams, see respective dev branch
+- implement other methods for find_saddles()
 - implement necklace code --> how to choose flow parameters?
 - consistent code formatting
+- generalise the 'Thc' terminology (folds?)
