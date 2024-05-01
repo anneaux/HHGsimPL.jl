@@ -89,6 +89,48 @@ end
         end
     end
 
+    ### this sorts linesegments such that they form a connected line
+    function sort_linesegs(linesegs::Vector{LineSeg})
+        linesegs_dict = Dict()
+        for ls in linesegs
+            linesegs_dict[ls.sindex] = ls
+        end
+        
+        # Initialize the sorted line segments vector with the first line segment
+        sorted_linesegs = [linesegs[1]]
+        
+        # Iterate until all line segments are sorted
+        while length(sorted_linesegs) != length(linesegs)
+            # Find the next line segment based on the end index of the last sorted segment
+            matching_ls = linesegs_dict[last(sorted_linesegs).eindex]
+            push!(sorted_linesegs, matching_ls)
+        end
+        
+        return sorted_linesegs
+    end
+
+### simple Gauss area formula to find the area enclosed by the necklace (to double-check if it's not got folded into itself)
+function enclosed_area(linesegs::Vector{LineSeg}, f::Function = x -> real(x))
+    # Initialize the area accumulator
+    area = 0.0
+    
+    # Iterate over each line segment
+    for i in 1:length(linesegs)
+        # Get the coordinates of the endpoints of the line segment
+        x1 = f(linesegs[i].s.x)
+        y1 = f(linesegs[i].s.y)
+        x2 = f(linesegs[i].e.x)
+        y2 = f(linesegs[i].e.y)        
+        
+        # Update the area accumulator
+        area += x1*y2 - x2*y1
+    end
+    
+    # Divide the result by 2 to get the absolute area
+    area = abs(area) / 2.0
+    
+    return area
+end
 
 
 ### necklacy things
@@ -166,7 +208,7 @@ function adorn_necklace!(necklace::Vector{LineSeg}, points::Vector{Point})
 end;
 
 ### get necklace
-function get_necklace(b::Beam, Ip::Float64,
+function get_necklace_solver(b::Beam, Ip::Float64,
         q::Number,
         ti::ComplexF64, tr::ComplexF64
         ; Ninit::Int64=20, Ncounter::Int64=500,
@@ -203,9 +245,39 @@ function get_necklace(b::Beam, Ip::Float64,
         
     if counter == Ncounter 
         println("I broke because the counter reached its max, i.e. $Ncounter")
-    end        
+    end
 
+    necklace = sort_linesegs(necklace)
     adorn_necklace!(necklace, points)
     
     return necklace
 end;
+
+
+
+function get_necklace(b::Beam, Ip::Float64,
+        q::Number,
+        ti::ComplexF64, tr::ComplexF64
+        ; Ninit::Int64=20, Ncounter::Int64=500,
+        eigvecfactorinit::Float64 = 0.01, # I should come up with sophisticated guesses here.
+        flowstepfactor::Float64 = 0.1, 
+        subdividethreshold::Float64 = 0.5 )
+    
+   necklace = get_necklace_solver(b, Ip, q, ti, tr; Ninit=Ninit, Ncounter=Ncounter,
+        eigvecfactorinit = eigvecfactorinit, # I should come up with sophisticated guesses here.
+        flowstepfactor = flowstepfactor, 
+        subdividethreshold = subdividethreshold )
+    # I think there's a good julian way to pass on the kwargs
+    
+    counter = 0
+    while ((enclosed_area(necklace,imag) + enclosed_area(necklace,real)) < 1.) && counter < 4
+        println("Warning! I had to calculate the necklace again with a different eigvecfactorinit!")
+        necklace = get_necklace_solver(b, Ip, q, ti, tr; Ninit = Ninit, Ncounter=Ncounter,
+        eigvecfactorinit = eigvecfactorinit*2, # I should come up with sophisticated guesses here.
+        flowstepfactor = flowstepfactor, 
+        subdividethreshold = subdividethreshold )
+        Ncounter *= 2 # random other guess to improve the necklace finding
+        counter += 1
+    end
+    return necklace
+end
