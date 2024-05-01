@@ -259,7 +259,7 @@ function get_necklace(b::Beam, Ip::Float64,
         q::Number,
         ti::ComplexF64, tr::ComplexF64
         ; Ninit::Int64=20, Ncounter::Int64=500,
-        eigvecfactorinit::Float64 = 0.01, # I should come up with sophisticated guesses here.
+        eigvecfactorinit::Float64 = 0.02, # I should come up with sophisticated guesses here.
         flowstepfactor::Float64 = 0.1, 
         subdividethreshold::Float64 = 0.5 )
     
@@ -272,7 +272,7 @@ function get_necklace(b::Beam, Ip::Float64,
     counter = 0
     while ((enclosed_area(necklace,imag) + enclosed_area(necklace,real)) < 1.) && 
         counter < 4 && length(necklace) > Ninit+1
-        
+
         println("Warning! I had to calculate the necklace again with a different eigvecfactorinit!")
         necklace = get_necklace_solver(b, Ip, q, ti, tr; Ninit = Ninit, Ncounter=Ncounter,
         eigvecfactorinit = eigvecfactorinit*2, # I should come up with sophisticated guesses here.

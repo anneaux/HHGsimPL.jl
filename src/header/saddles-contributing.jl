@@ -117,7 +117,7 @@ function check_contribution(b::Beam, Ip::Float64,
     ti_cd::ComplexDomain, tr_cd::ComplexDomain
     ; Ntimes = 100, Ncounter = 600)
     
-    if real(-im * S(b, Ip, ti, tr, q))) < 0
+    if real(-im * S(b, Ip, ti, tr, q)) < 0
         necklace = get_necklace(b, Ip, q, ti, tr, Ncounter = Ncounter)
         check_contribution(necklace, b, Ip, q, ti, tr, ti_cd, tr_cd, Ntimes = Ntimes)
     else 
