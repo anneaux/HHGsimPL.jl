@@ -29,6 +29,10 @@ function S(b::Beam, Ip::Float64,
 
 end 
 
+
+S_v(b::Beam, Ip::Float64, s::Saddle) = S_v(b, Ip, s.ti, s.tr, s.p) 
+S(b::Beam, Ip::Float64, s::Saddle) = S(b, Ip, s.ti, s.tr, s.q, s.p)
+
 ## h und H function
 
 

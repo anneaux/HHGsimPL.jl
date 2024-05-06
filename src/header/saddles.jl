@@ -115,3 +115,42 @@ function find_saddles_sobol(q::Number;
     sort!(saddles, by = x -> real(x.ti))
 	return saddles
 end;
+
+
+# I don't actually need all those kwargs but I want to make it easy to switch between the functions and I don't know how to do that nicely for now
+function find_saddle_similar_seed(q::Number, seed::Saddle;
+        b::Beam, Ip::Real,
+        ti_cd::ComplexDomain,
+        tr_cd::ComplexDomain = ComplexDomain(real(ti_cd.min) - imag(ti_cd.max)*im,ti_cd.max + TCycle(b)), 
+        tt_minimal::Float64 = 0.005,
+        beam::Beam=b ) # number of seeds generated per domain
+    
+    roundDigits = 2
+    t0 = [reim(seed.ti)... , reim(seed.tr)...]
+
+    tiSP, trSP = solve_SPEqs(q, t0, beam, Ip, roundDigits) # last arg: rounddigits
+
+    if check_sp(b, tiSP, trSP, tt_minimal = tt_minimal) && in(tiSP, ti_cd) && in(trSP,tr_cd)
+        return Saddle(q, tiSP, trSP, p_fun(b, tiSP,trSP))
+    else 
+        return nothing
+    end
+end;
+
+# I could then somehow include it in a function like this
+#         previous_saddles = saddles_Dict[q]
+#         next_saddles = Vector{Saddle}()
+#         q += 1
+# #         @show q
+#         for s in previous_saddles
+#             new = find_saddle_similar_seed(q, s, 
+#                 b = beam, Ip = Ip, ti_cd = ti_domain, tr_cd = tr_domain, N = 200)   
+#             if new != nothing
+#                 push!(next_saddles, new)
+#             else 
+#                 println("couldn't find a new one!")
+#             end
+#         end
+#         unique!( s -> round.([s.tr,s.ti], digits= 2), next_saddles)
+#         sort!(next_saddles, by = x -> real(x.ti))
+#         saddles_Dict[q] = next_saddles

@@ -10,7 +10,6 @@ end
 
 
 
-
 function plot_sp_times_cp(b::Beam, saddles::Vector{Saddle}, thcs::Vector{Thc}=Vector{Thc}(),
         ti_cd::ComplexDomain = ComplexDomain(),
         tr_cd::ComplexDomain = ComplexDomain(real(ti_cd.min)-imag(ti_cd.max)*im,ti_cd.max + TCycle(b)),
@@ -68,6 +67,76 @@ function plot_sp_times_cp(b::Beam, saddles_dict::Dict{T,Vector{Saddle}},
 
     plot_sp_times_cp(b, vcat(values(saddles_dict)...), thcs, ti_cd, tr_cd, tt_cd)
 end
+
+
+
+function plot_sp_times_cp(b::Beam, saddlesTup::Vector{Tuple{Saddle,Bool}}, thcs::Vector{Thc},
+        ti_cd::ComplexDomain = ComplexDomain(),
+        tr_cd::ComplexDomain = ComplexDomain(real(ti_cd.min)-imag(ti_cd.max)*im,ti_cd.max + TCycle(b)),
+        tt_cd::ComplexDomain = ComplexDomain()) 
+    
+    plt_tt = plot(legend = false, xlabel = "real part", ylabel = "imaginary part", title = "travel time")
+    plt_ti = plot(legend = false, xlabel = "real part", ylabel = "imaginary part", title = "ionization time")
+    plt_tr = plot(legend = false, xlabel = "real part", ylabel = "imaginary part", title = "recombination time")
+    
+    for tup in saddlesTup
+        s = tup[1]
+        relevant = tup[2]
+        
+        col = harmonic_color(real(s.q), [real(tup[1].q) for tup in saddlesTup])
+        spmarker = (:o,2, relevant ? col : :white,stroke(2,col))
+        
+        ttr = real(s.tr-s.ti)./TCycle(b)
+        tti = imag(s.tr-s.ti)./TCycle(b)
+        
+        ### travel time
+        scatter!(plt_tt,(ttr,tti), aspectratio = 1., marker = spmarker)
+        scatter!(plt_ti,reim(s.ti)./TCycle(b), aspectratio = 1., marker = spmarker)
+        scatter!(plt_tr,reim(s.tr)./TCycle(b), aspectratio = 1., marker = spmarker)
+    end
+
+    plot_shape(plt, cd::ComplexDomain) =
+        plot!(plt, Shape(real.([cd.min,cd.max,cd.max,cd.min])./TCycle(b),
+            imag.([cd.min,cd.min,cd.max,cd.max])./TCycle(b)), 
+        fillalpha = 0,
+        fillcolor = :yellow, 
+        linecolor = :grey,
+        linewidth = 3 )
+    
+    plot_shape(plt_ti,ti_cd)
+    
+    if !iszero(ti_cd.min)
+        plot_shape(plt_tr, tr_cd)
+    end
+    
+    thcmarker = (:diamond,3,:black,stroke(3,:black))
+    for thc in thcs
+        ttr = real(thc.trhc-thc.tihc)./TCycle(b)
+        tti = imag(thc.trhc-thc.tihc)./TCycle(b)
+
+        scatter!(plt_tt,(ttr,tti), aspectratio = 1., marker = thcmarker)
+        scatter!(plt_ti,reim(thc.tihc)./TCycle(b), aspectratio = 1., marker = thcmarker)
+        scatter!(plt_tr,reim(thc.trhc)./TCycle(b), aspectratio = 1., marker = thcmarker)
+    end 
+    
+    return plot(plt_ti, plt_tr, plt_tt, layout=(1,3), size = (900,250))
+end;
+
+
+
+function plot_sp_times_cp(b::Beam, saddlesTup_dict::Dict{T,Vector{Tuple{Saddle,Bool}}},
+        thcs::Vector{Thc}=Vector{Thc}(),
+        ti_cd::ComplexDomain = ComplexDomain(),
+        tr_cd::ComplexDomain = ComplexDomain(real(ti_cd.min)-imag(ti_cd.max)*im,ti_cd.max + TCycle(b)),
+        tt_cd::ComplexDomain = ComplexDomain()) where T <: Number
+
+    plot_sp_times_cp(b, vcat(values(saddles_dict)...), thcs, ti_cd, tr_cd, tt_cd)
+end
+
+
+
+
+
 
 
 

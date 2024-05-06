@@ -18,9 +18,9 @@ using Contour
 include("utils.jl")
 include("beams.jl")
 
+include("saddles.jl")
 include("equations.jl")
 
-include("saddles.jl")
 include("stokes-and-cutoffs.jl")
 include("necklace.jl")
 include("saddles-contributing.jl")
