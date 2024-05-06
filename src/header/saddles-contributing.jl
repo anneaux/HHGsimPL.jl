@@ -34,8 +34,8 @@
 
 ### calculating the contour line through a given saddle
 function contourline_through_saddle(b::Beam, Ip::Float64,
-	q::Number,
-	ti::ComplexF64, tr::ComplexF64,
+    q::Number,
+    ti::ComplexF64, tr::ComplexF64,
     ti_cd::ComplexDomain, tr_cd::ComplexDomain
     ; Ntimes = 100)    
     
@@ -50,15 +50,21 @@ function contourline_through_saddle(b::Beam, Ip::Float64,
     S_saddle = -1im*S(b, Ip, ti, tr, q)
     contour_saddle = Contour.contour(tir_values, trr_values, imag.(S_values), imag(S_saddle) )
 
-    if length(contour_saddle.lines) != 1
-        println("Careful! There's more than one or no level line going through the saddle point for $b at q $q.")
-        # I should check if the contour runs through the SP
-    end
-    
-    if length(contour_saddle.lines) >= 1
+    if length(contour_saddle.lines) == 1
         return contour_saddle.lines[1]
-    else
+    elseif length(contour_saddle.lines) == 0
+        println("Careful! There's no level line going through the saddle point for $b at q $q.")
         return missing
+    else
+        print("Careful! There's more than one level line going through the saddle point for $b at q $q,")   
+        p = Point(real(ti), real(tr))
+        filter!(curve -> (find_crossing(curve, p, 3.) != nothing ), contour_saddle.lines)
+        if length(contour_saddle.lines) == 1
+            println(" but I've resolved it.")   
+            return contour_saddle.lines[1]
+        else 
+            println(" and we do in fact have a problem.") #. There was more than one level line going through the saddle point for $b at q $q, but they seem to not actually intersect (or multiple of them)")
+        end
     end
 end
 
