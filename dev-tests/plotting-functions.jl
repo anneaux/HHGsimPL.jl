@@ -179,19 +179,17 @@ function plot_necklace_3D(necklace::Vector{LineSeg},
     
 end
 
-function plot_necklace_2D(necklace::Vector{LineSeg})
-    plt_imag = plot(title = "ti: $testti, tr: $testtr",
-        xlabel = "Im(ti)", ylabel = "Im(tr)")
+function plot_necklace_2D(necklace::Vector{LineSeg}, ti::ComplexF64, tr::ComplexF64)
+    plt_imag = plot(xlabel = "Im(ti)", ylabel = "Im(tr)")
         plot!(plt_imag, [imag.((necklace[i].s.x, necklace[i].s.y)) for i in 1:length(necklace)],
-            legend = false, marker = true)
-        scatter!(plt_imag, [imag.((testti,testtr))], marker = (:red, :x, 5), label = "saddle point")
+            label = false, marker = true)
+        scatter!(plt_imag, [imag.((ti,tr))], marker = (:red, :x, 5), label = "saddle point", legend = :bottom)
 
-    plt_real = plot(title = "ti: $testti, tr: $testtr",
-        xlabel = "Re(ti)", ylabel = "Re(tr)")
+    plt_real = plot(xlabel = "Re(ti)", ylabel = "Re(tr)")
         plot!(plt_real, [real.((necklace[i].s.x, necklace[i].s.y)) for i in 1:length(necklace)],
-            legend = false, marker = true)
-        scatter!(plt_real, [real.((testti,testtr))], marker = (:red, :x, 5), label = "saddle point")
+            label = false, marker = true)
+        scatter!(plt_real, [real.((ti,tr))], marker = (:red, :x, 5), label = false)
 
-    return plot(plt_imag, plt_real, layout = (1,2))
+    return plot(plt_imag, plt_real, layout = (1,2), plot_title = "ti: $ti, tr: $tr", legend = :bottom)
 end
 
