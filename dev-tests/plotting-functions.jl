@@ -130,14 +130,8 @@ function plot_sp_times_cp(b::Beam, saddlesTup_dict::Dict{T,Vector{Tuple{Saddle,B
         tr_cd::ComplexDomain = ComplexDomain(real(ti_cd.min)-imag(ti_cd.max)*im,ti_cd.max + TCycle(b)),
         tt_cd::ComplexDomain = ComplexDomain()) where T <: Number
 
-    plot_sp_times_cp(b, vcat(values(saddles_dict)...), thcs, ti_cd, tr_cd, tt_cd)
+    plot_sp_times_cp(b, vcat(values(saddlesTup_dict)...), thcs, ti_cd, tr_cd, tt_cd)
 end
-
-
-
-
-
-
 
 
 

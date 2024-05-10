@@ -56,7 +56,7 @@ function contourline_through_saddle(b::Beam, Ip::Float64,
         println("Careful! There's no level line going through the saddle point for $b at q $q.")
         return missing
     else
-        print("Careful! There's more than one level line going through the saddle point for $b at q $q,")   
+        print("Careful! There's more than one level line going through the saddle point for $b at q $q,")
         p = Point(real(ti), real(tr))
         filter!(curve -> (find_crossing(curve, p, 3.) != nothing ), contour_saddle.lines)
         if length(contour_saddle.lines) == 1
