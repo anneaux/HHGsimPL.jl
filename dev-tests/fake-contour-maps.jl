@@ -159,7 +159,7 @@ function is_saddle_relevant_tr(b::Beam, Ip::Real, saddle::Saddle,
         # println("I'm in regime (2), because ", abs(imag(saddle.tr)) )
         str = saddle.tr
         # when the sp is exactly at the border I want to make sure it reaches up to line
-        rg = max(abs(imag(str)),0.01*TC) * 1.1 
+        rg = max(abs(imag(str)),0.01*TC) * 2. 
         trr_values = range(real(str) - rg, stop = real(str) + rg, length=51) # we want the length to be an odd number
         tri_values = range(imag(str) - rg, stop = imag(str) + rg, length=51)
     else
@@ -272,7 +272,7 @@ function plot_action_contours(beam::Beam,
         relevant = false
 
         str = s.tr
-        rg = max(abs(imag(s.tr)),0.01*TC ) * 1.1 #
+        rg = max(abs(imag(s.tr)),0.01*TC ) * 2. #
         trr_values = range(real(str) - rg, stop = real(str) + rg, length=51)
         tri_values = range(imag(str) - rg, stop = imag(str) + rg, length=51)
 

@@ -178,3 +178,20 @@ function plot_necklace_3D(necklace::Vector{LineSeg},
 #     plot(plt_1, plt_2, layout = (1,2), size = (800,400)) 
     
 end
+
+function plot_necklace_2D(necklace::Vector{LineSeg})
+    plt_imag = plot(title = "ti: $testti, tr: $testtr",
+        xlabel = "Im(ti)", ylabel = "Im(tr)")
+        plot!(plt_imag, [imag.((necklace[i].s.x, necklace[i].s.y)) for i in 1:length(necklace)],
+            legend = false, marker = true)
+        scatter!(plt_imag, [imag.((testti,testtr))], marker = (:red, :x, 5), label = "saddle point")
+
+    plt_real = plot(title = "ti: $testti, tr: $testtr",
+        xlabel = "Re(ti)", ylabel = "Re(tr)")
+        plot!(plt_real, [real.((necklace[i].s.x, necklace[i].s.y)) for i in 1:length(necklace)],
+            legend = false, marker = true)
+        scatter!(plt_real, [real.((testti,testtr))], marker = (:red, :x, 5), label = "saddle point")
+
+    return plot(plt_imag, plt_real, layout = (1,2))
+end
+
