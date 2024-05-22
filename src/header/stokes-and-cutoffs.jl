@@ -27,13 +27,11 @@ function thceq1(b::Beam, Ip::Float64,
 end
 
 
-
-
 function thceq2(b::Beam, Ip::Float64,
   ti::ComplexF64,tr::ComplexF64)
 
   return dSv_dti(b, Ip, ti,tr)
-end   
+end
 
 
 ### cutoff energy 
@@ -63,7 +61,6 @@ function solve_Thceqs(t0::Vector{T},
     ### using NLSolve
         #
         function thceqs!(F,x)
-
             F[1] = real(thceq1(b, Ip, x[1]+x[2]*im, x[3]+x[4]*im))
             F[2] = real(thceq2(b, Ip, x[1]+x[2]*im, x[3]+x[4]*im))
             F[3] = imag(thceq1(b, Ip, x[1]+x[2]*im, x[3]+x[4]*im))
@@ -92,9 +89,11 @@ function find_thcs_sobol(b::Beam, Ip::Real,
         ti_cd::ComplexDomain, 
         tr_cd::ComplexDomain = ComplexDomain(real(ti_cd.min) - imag(ti_cd.max)*im,ti_cd.max + TCycle(b));
         N::Int64=100, tt_minimal::Float64 = 0.15,
-        beam::Beam=b # just for clarity
+        beam::Beam=b, # just for clarity
+        roundDigits::Int64=3
         )
     
+
     thc_array = Vector{Thc}()
 
     ti_seq = SobolSeq(reim(ti_cd.min),reim(ti_cd.max))
@@ -109,14 +108,16 @@ function find_thcs_sobol(b::Beam, Ip::Real,
         tihc, trhc = solve_Thceqs(thc0, beam, Ip, 5)
 
         ### checking if already found this
-        new = length(findall(x -> x.tihc == tihc && x.trhc == trhc, thc_array)) == 0     # unique
+        # new = length(findall(x -> x.tihc == tihc && x.trhc == trhc, thc_array)) == 0     # unique
         if check_sp(b, tihc,trhc,tt_minimal = tt_minimal) && 
-            new && in(tihc,ti_cd) && in(trhc,tr_cd)
+            in(tihc,ti_cd) && in(trhc,tr_cd)
             qhc = thc_qc(b, Ip, tihc, trhc)
             push!(thc_array, Thc(tihc, trhc, qhc))       
         end 
     end 
     
+    unique!( thc -> round.([thc.trhc,thc.tihc], digits=roundDigits), thc_array)
+   
     sort!(thc_array, by= x -> real(x.tihc))
     return thc_array
 end;

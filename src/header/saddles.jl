@@ -131,7 +131,7 @@ function find_saddle_similar_seed(q::Number, seed::Saddle;
     tiSP, trSP = solve_SPEqs(q, t0, beam, Ip, roundDigits) # last arg: rounddigits
 
     if check_sp(b, tiSP, trSP, tt_minimal = tt_minimal) && in(tiSP, ti_cd) && in(trSP,tr_cd)
-        return Saddle(q, tiSP, trSP, p_fun(b, tiSP,trSP))
+        return Saddle(q, tiSP, trSP, p_stationary(b, tiSP,trSP))
     else 
         return nothing
     end
