@@ -212,7 +212,7 @@ function get_necklace_solver(b::Beam, Ip::Float64,
         q::Number,
         ti::ComplexF64, tr::ComplexF64
         ; Ninit::Int64=20, Ncounter::Int64=500,
-        eigvecfactorinit::Float64 = 0.01, # I should come up with sophisticated guesses here.
+        eigvecfactorinit::Float64 = 0.02, # I should come up with sophisticated guesses here.
         flowstepfactor::Float64 = 0.1, 
         subdividethreshold::Float64 = 0.5 )
        
@@ -234,7 +234,8 @@ function get_necklace_solver(b::Beam, Ip::Float64,
         flow!(necklace, points, b, Ip, q, threshold = threshold, δ = flowstepfactor)
 
         if count([p.active for p in points]) == 0
-            println("I broke because the flow stopped after $counter iterations")
+            @debug "I broke because the flow stopped after $counter iterations"
+#             println("I broke because the flow stopped after $counter iterations")
             break
         end
         for i in 1:length(necklace)
@@ -244,7 +245,7 @@ function get_necklace_solver(b::Beam, Ip::Float64,
     end
         
     if counter == Ncounter 
-        println("I broke because the counter reached its max, i.e. $Ncounter")
+        println("I broke because the counter reached its max, i.e. $Ncounter for q$q")
     end
 
     necklace = sort_linesegs(necklace)
@@ -252,6 +253,7 @@ function get_necklace_solver(b::Beam, Ip::Float64,
     
     return necklace
 end;
+
 
 
 
@@ -273,7 +275,7 @@ function get_necklace(b::Beam, Ip::Float64,
     while ((enclosed_area(necklace,imag) + enclosed_area(necklace,real)) < 1.) && 
         counter < 4 && length(necklace) > Ninit+1
 
-        println("Warning! I had to calculate the necklace again with a different eigvecfactorinit!")
+        println("Warning! I had to calculate the necklace again with a different eigvecfactorinit, for the $(counter+1) time!")
         necklace = get_necklace_solver(b, Ip, q, ti, tr; Ninit = Ninit, Ncounter=Ncounter,
         eigvecfactorinit = eigvecfactorinit*2, # I should come up with sophisticated guesses here.
         flowstepfactor = flowstepfactor, 
@@ -282,4 +284,4 @@ function get_necklace(b::Beam, Ip::Float64,
         counter += 1
     end
     return necklace
-end
+end;

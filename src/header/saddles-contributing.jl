@@ -89,7 +89,9 @@ function check_contribution(necklace::Vector{LineSeg},
     idx = find_crossing( imag.(necklace), p)
     
     if isnothing(idx)
-       println("it doesn't contribute! (1)")
+        @debug "it doesn't contribute! (1)"
+
+#        println("it doesn't contribute! (1)")
        active = false
     else         
         ### get the point where it hits & check if it's in the integration domain
@@ -98,23 +100,23 @@ function check_contribution(necklace::Vector{LineSeg},
         # mustn't use the starting point here, could use the centre point!
         
         if isnothing(hitting_point)
-           println("it doesn't contribute! (2)")
+           println("it doesn't contribute! $q (2)") # because this shouldn't happen!
            active = false
         else
             ### check if the contour runs through that point
             contourline = contourline_through_saddle(b, Ip, q, ti, tr, ti_cd, tr_cd )
             
             if isnothing(find_crossing(contourline, hitting_point))
-                println("it doesn't contribute! (3)")
+                @debug "it doesn't contribute! (3)"
                 active = false
             else 
-                println("it contributes!")
+                @debug "it contributes!"
                 active = true
             end
         end
     end
     return active
-end
+end;
 
 
 function check_contribution(b::Beam, Ip::Float64,
