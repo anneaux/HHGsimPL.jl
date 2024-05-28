@@ -14,7 +14,7 @@
 	    return distance_point_to_line([p.x,p.y], [l.s.x, l.s.y], [l.e.x, l.e.y])
 	end
 
-	function find_crossing(line::Vector{LineSeg}, point::Point{T}, tolerance::Float64=0.75) where T<:Real
+	function find_crossing(line::Vector{LineSeg}, point::Point{T}, tolerance::Float64=0.8) where T<:Real
 	    mindist, index = findmin([distance_point_to_line(point, seg) for seg in line])
 	    if mindist < tolerance
 	        return index
@@ -23,12 +23,12 @@
 	    end
 	end
 
-	function find_crossing(curve::Curve2{Tuple{T, T}}, point::Point{T}, tolerance::Float64=0.75) where T<:Real
+	function find_crossing(curve::Curve2{Tuple{T, T}}, point::Point{T}, tolerance::Float64=0.8) where T<:Real
 	    line = [LineSeg( Point(curve.vertices[i]...), Point(curve.vertices[i+1]...)) for i in 1:(length(curve.vertices)-1) ]
 	    return find_crossing(line, point, tolerance)
 	end
 
-	function find_crossing(nocurve::Missing, point::Point{T}, tolerance::Float64=0.75) where T<:Real
+	function find_crossing(nocurve::Missing, point::Point{T}, tolerance::Float64=0.8) where T<:Real
 	    return nothing
 	end
 
@@ -58,7 +58,7 @@ function contourline_through_saddle(b::Beam, Ip::Float64,
     else
         print("Careful! There's more than one level line going through the saddle point for $b at q $q,")
         p = Point(real(ti), real(tr))
-        filter!(curve -> (find_crossing(curve, p, 3.) != nothing ), contour_saddle.lines)
+        filter!(curve -> (find_crossing(curve, p, 4.) != nothing ), contour_saddle.lines) # where does this value come from and should I choose a better one?
         if length(contour_saddle.lines) == 1
             println(" but I've resolved it.")   
             return contour_saddle.lines[1]
