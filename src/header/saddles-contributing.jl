@@ -33,7 +33,7 @@
 	end
 
 ### calculating the contour line through a given saddle
-function contourline_through_saddle(b::Beam, Ip::Float64,
+function real_projected_contourlines(b::Beam, Ip::Float64,
     q::Number,
     ti::ComplexF64, tr::ComplexF64,
     ti_cd::ComplexDomain, tr_cd::ComplexDomain
@@ -50,30 +50,15 @@ function contourline_through_saddle(b::Beam, Ip::Float64,
     S_saddle = -1im*S(b, Ip, ti, tr, q)
     contour_saddle = Contour.contour(tir_values, trr_values, imag.(S_values), imag(S_saddle) )
 
-    if length(contour_saddle.lines) == 1
-        return contour_saddle.lines[1]
-    elseif length(contour_saddle.lines) == 0
-        println("Careful! There's no level line going through the saddle point for $b at q $q.")
-        return missing
-    else
-        print("Careful! There's more than one level line going through the saddle point for $b at q $q,")
-        p = Point(real(ti), real(tr))
-        filter!(curve -> (find_crossing(curve, p, 4.) != nothing ), contour_saddle.lines) # where does this value come from and should I choose a better one?
-        if length(contour_saddle.lines) == 1
-            println(" but I've resolved it.")   
-            return contour_saddle.lines[1]
-        else 
-            println(" and we do in fact have a problem for saddle ti $ti, tr $tr.") #. There was more than one level line going through the saddle point for $b at q $q, but they seem to not actually intersect (or multiple of them)")
-        end
-    end
+    return contour_saddle.lines
 end
 
-function contourline_through_saddle(b::Beam, Ip::Float64,
-	s::Saddle,
+function real_projected_contourlines(b::Beam, Ip::Float64,
+    s::Saddle,
     ti_cd::ComplexDomain, tr_cd::ComplexDomain
     ; Ntimes = 100) 
 
-    contourline_through_saddle(b, Ip, s.q, s.ti, s.tr, ti_cd, tr_cd; Ntimes = Ntimes) 
+    real_projected_contourlines(b, Ip, s.q, s.ti, s.tr, ti_cd, tr_cd; Ntimes = Ntimes) 
 end
 
 ### checking if conditions are fulfilled
@@ -90,8 +75,6 @@ function check_contribution(necklace::Vector{LineSeg},
     
     if isnothing(idx)
         @debug "it doesn't contribute! (1)"
-
-#        println("it doesn't contribute! (1)")
        active = false
     else         
         ### get the point where it hits & check if it's in the integration domain
@@ -103,18 +86,20 @@ function check_contribution(necklace::Vector{LineSeg},
            println("it doesn't contribute! $q (2)") # because this shouldn't happen!
            active = false
         else
-            ### check if the contour runs through that point
-            contourline = contourline_through_saddle(b, Ip, q, ti, tr, ti_cd, tr_cd )
+            ### check if the projected contour runs through that point
+            contourlines = real_projected_contourlines(b, Ip, q, ti, tr, ti_cd, tr_cd )
             
-            if isnothing(find_crossing(contourline, hitting_point))
-                @debug "it doesn't contribute! (3)"
-                active = false
-            else 
-                @debug "it contributes!"
-                active = true
+            crosses = [false]
+            for line in contourlines
+                crossings = find_crossing(line, hitting_point)
+                @debug "crosses at $crossings"
+                push!(crosses, !isnothing(crossings))
             end
+            active = any(crosses)
+            if !active @debug "it doesn't contribute! (3)" end
         end
-    end
+    end       
+
     return active
 end;
 
