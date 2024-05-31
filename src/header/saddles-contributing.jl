@@ -63,7 +63,7 @@ function contourline_through_saddle(b::Beam, Ip::Float64,
             println(" but I've resolved it.")   
             return contour_saddle.lines[1]
         else 
-            println(" and we do in fact have a problem.") #. There was more than one level line going through the saddle point for $b at q $q, but they seem to not actually intersect (or multiple of them)")
+            println(" and we do in fact have a problem for saddle ti $ti, tr $tr.") #. There was more than one level line going through the saddle point for $b at q $q, but they seem to not actually intersect (or multiple of them)")
         end
     end
 end
@@ -123,12 +123,13 @@ function check_contribution(b::Beam, Ip::Float64,
 	q::Number,
 	ti::ComplexF64, tr::ComplexF64,
     ti_cd::ComplexDomain, tr_cd::ComplexDomain
-    ; Ntimes = 100, Ncounter = 600)
+    ; Ntimes = 100, Ncounter = 600, logerrors::Bool=false)
     
     if real(-im * S(b, Ip, ti, tr, q)) < 0
-        necklace = get_necklace(b, Ip, q, ti, tr, Ncounter = Ncounter)
+        necklace = get_necklace(b, Ip, q, ti, tr, Ncounter = Ncounter, logerrors= logerrors)
         check_contribution(necklace, b, Ip, q, ti, tr, ti_cd, tr_cd, Ntimes = Ntimes)
     else 
+        @debug "it doesn't contribute! (0)"
         return false
     end
     # what happens if doesn't converge?   

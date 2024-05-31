@@ -263,7 +263,8 @@ function get_necklace(b::Beam, Ip::Float64,
         ; Ninit::Int64=20, Ncounter::Int64=500,
         eigvecfactorinit::Float64 = 0.02, # I should come up with sophisticated guesses here.
         flowstepfactor::Float64 = 0.1, 
-        subdividethreshold::Float64 = 0.5 )
+        subdividethreshold::Float64 = 0.5,
+        logerrors::Bool=false )
     
    necklace = get_necklace_solver(b, Ip, q, ti, tr; Ninit=Ninit, Ncounter=Ncounter,
         eigvecfactorinit = eigvecfactorinit, # I should come up with sophisticated guesses here.
@@ -275,11 +276,16 @@ function get_necklace(b::Beam, Ip::Float64,
     while ((enclosed_area(necklace,imag) + enclosed_area(necklace,real)) < 1.) && 
         counter < 4 && length(necklace) > Ninit+1
 
-        println("Warning! I had to calculate the necklace again with a different eigvecfactorinit, for the $(counter+1) time!")
+        println("Warning (1)! I had to calculate the necklace again with a different eigvecfactorinit, for the $(counter+1) time!")
         necklace = get_necklace_solver(b, Ip, q, ti, tr; Ninit = Ninit, Ncounter=Ncounter,
         eigvecfactorinit = eigvecfactorinit*2, # I should come up with sophisticated guesses here.
         flowstepfactor = flowstepfactor, 
         subdividethreshold = subdividethreshold )
+
+        if counter==3 && logerrors
+            log_error("necklace-errors.txt", "Warning (1) for beam $b at q $q with ti $ti and tr $tr.")
+        end
+
         Ncounter *= 2 # random other guess to improve the necklace finding
         counter += 1
     end

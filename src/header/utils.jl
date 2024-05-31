@@ -79,3 +79,21 @@ end
 scalarproduct(a::Vector{}, b::Vector{}) = sum( a .* b )
 scalarproduct(a::Vector{}) = scalarproduct(a,a)
 scalarproduct2(a::Vector{}) = scalarproduct(a,a)
+
+
+
+#####################
+function log_error(file_path::String, error_message::String)
+    # Check if the file exists
+    if !isfile(file_path)
+        # Create the file if it doesn't exist
+        open(file_path, "w") do file
+            # Just open and close the file to create it
+        end
+    end
+
+    # Append the error message to the file
+    open(file_path, "a") do file
+        write(file, error_message * "\n")
+    end
+end
