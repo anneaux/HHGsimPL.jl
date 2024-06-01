@@ -273,7 +273,7 @@ function get_necklace(b::Beam, Ip::Float64,
     # I think there's a good julian way to pass on the kwargs
     
     counter = 0
-    while ((enclosed_area(necklace,imag) + enclosed_area(necklace,real)) < 1.) && 
+    while ((enclosed_area(necklace,imag) + enclosed_area(necklace,real)) < 0.5) && 
         counter < 4 && length(necklace) > Ninit+1
 
         println("Warning (1)! I had to calculate the necklace again with a different eigvecfactorinit, for the $(counter+1) time!")
