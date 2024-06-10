@@ -79,7 +79,7 @@ end
     imag(ls::LineSeg) = LineSeg(imag(ls.s),imag(ls.e), ls.active)
     real(ls::LineSeg) = LineSeg(real(ls.s),real(ls.e), ls.active);
 
-    function get_point(ls::LineSeg,which::Symbol=:s)
+    function get_point(ls::LineSeg, which::Symbol=:s)
         if which==:s
             return Point(ls.s.x, ls.s.y)
         elseif which == :e
@@ -235,7 +235,7 @@ function get_necklace_solver(b::Beam, Ip::Float64,
 
         if count([p.active for p in points]) == 0
             @debug "I broke because the flow stopped after $counter iterations"
-#             println("I broke because the flow stopped after $counter iterations")
+        # println("I broke because the flow stopped after $counter iterations")
             break
         end
         for i in 1:length(necklace)

@@ -11,7 +11,7 @@ using Integrals
 using FiniteDiff
 using StaticArrays
 using Contour
-
+using Peaks
 
 
 

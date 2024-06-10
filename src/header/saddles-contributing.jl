@@ -14,14 +14,35 @@
 	    return distance_point_to_line([p.x,p.y], [l.s.x, l.s.y], [l.e.x, l.e.y])
 	end
 
-	function find_crossing(line::Vector{LineSeg}, point::Point{T}, tolerance::Float64=0.8) where T<:Real
-	    mindist, index = findmin([distance_point_to_line(point, seg) for seg in line])
-	    if mindist < tolerance
-	        return index
-	    else 
-	        return nothing
-	    end
-	end
+	# function find_crossing(line::Vector{LineSeg}, point::Point{T}, tolerance::Float64=0.8) where T<:Real
+	#     mindist, index = findmin([distance_point_to_line(point, seg) for seg in line])
+
+	#     if mindist < tolerance
+	#         return index
+	#     else 
+	#         return nothing
+	#     end
+	# end
+
+    function find_crossing(line::Vector{LineSeg}, point::Point{T}, tolerance::Float64=0.8;
+        loginfo=[]) where T<:Real
+        distances = [distance_point_to_line(point, seg) for seg in line]
+        
+        # finds local minima of the distances, filters for those where the height is <0.8, and returns the respective indices
+    # https://docs.juliahub.com/Peaks/3TWUM/0.5.2/
+        peakindices = peakheights(findminima(distances), max = tolerance).indices 
+
+        if length(peakindices) == 1
+           return peakindices[1]
+        elseif length(peakindices) == 0
+            return nothing
+        else
+            @warn "I'm hitting the integration plane more than once I think"
+            log_error("necklace-hitting-ID-errors.txt", "Warning (2) for beam $(loginfo[1]) at q $(loginfo[2]) with ti $(loginfo[3]) and tr $(loginfo[4]).")
+            return peakindices[1]
+        end
+    end
+
 
 	function find_crossing(curve::Curve2{Tuple{T, T}}, point::Point{T}, tolerance::Float64=0.8) where T<:Real
 	    line = [LineSeg( Point(curve.vertices[i]...), Point(curve.vertices[i+1]...)) for i in 1:(length(curve.vertices)-1) ]
@@ -41,9 +62,9 @@ function real_projected_contourlines(b::Beam, Ip::Float64,
     
     TC = TCycle(b)
     tir_values = range(real(ti)- 0.5TC, stop = real(ti) + 0.5TC, length = Ntimes)
-    tii_values = range(-1., stop = imag(ti) + 0.25TC, length = Ntimes)
+    # tii_values = range(-1., stop = imag(ti) + 0.25TC, length = Ntimes)
     trr_values = range(real(tr)- 0.5TC, stop = real(tr) + 0.5TC, length = Ntimes)
-    tri_values = range(-1., stop = imag(ti) + 0.25TC, length = Ntimes) 
+    # tri_values = range(-1., stop = imag(ti) + 0.25TC, length = Ntimes)  # this is wrong, because tr can have negative imaginary part! Luckily I don't need that here anyway ;-)
 
     ### level line for the saddle point
     S_values = [-1im*S(b, Ip, complex(tir), complex(trr), q) for tir in tir_values, trr in trr_values]
@@ -71,7 +92,7 @@ function check_contribution(necklace::Vector{LineSeg},
     
     ### check if necklace hits real plane
     p = Point(0.,0.)
-    idx = find_crossing( imag.(necklace), p)
+    idx = find_crossing( imag.(necklace), p, loginfo=(b,q,ti,tr))
     
     if isnothing(idx)
         @debug "it doesn't contribute! (1)"
