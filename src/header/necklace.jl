@@ -244,7 +244,7 @@ function get_necklace_solver(b::Beam, Ip::Float64,
         keepat!(necklace, [ls.active for ls in necklace])
     end
         
-    if counter == Ncounter 
+    if counter == Ncounter && Ncounter > 1
         println("I broke because the counter reached its max, i.e. $Ncounter for q$q")
     end
 
@@ -253,8 +253,6 @@ function get_necklace_solver(b::Beam, Ip::Float64,
     
     return necklace
 end;
-
-
 
 
 function get_necklace(b::Beam, Ip::Float64,
@@ -271,23 +269,38 @@ function get_necklace(b::Beam, Ip::Float64,
         flowstepfactor = flowstepfactor, 
         subdividethreshold = subdividethreshold )
     # I think there's a good julian way to pass on the kwargs
-    
-    counter = 0
-    while ((enclosed_area(necklace,imag) + enclosed_area(necklace,real)) < 0.5) && 
-        counter < 4 && length(necklace) > Ninit+1
 
-        println("Warning (1)! I had to calculate the necklace again with a different eigvecfactorinit, for the $(counter+1) time!")
-        necklace = get_necklace_solver(b, Ip, q, ti, tr; Ninit = Ninit, Ncounter=Ncounter,
-        eigvecfactorinit = eigvecfactorinit*2, # I should come up with sophisticated guesses here.
+
+    necklace_init = get_necklace_solver(b, Ip, q, ti, tr; Ninit = Ninit, Ncounter=1,
+        eigvecfactorinit = eigvecfactorinit, # I should come up with sophisticated guesses here.
         flowstepfactor = flowstepfactor, 
         subdividethreshold = subdividethreshold )
-
-        if counter==3 && logerrors
-            log_error("necklace-errors.txt", "Warning (1) for beam $b at q $q with ti $ti and tr $tr.")
-        end
-
-        Ncounter *= 2 # random other guess to improve the necklace finding
-        counter += 1
+    
+    enclosed_area_init = enclosed_area(necklace_init,imag) + enclosed_area(necklace_init,real)
+    
+    if (enclosed_area(necklace,imag) + enclosed_area(necklace,real)) > enclosed_area_init
+        return necklace
+    else 
+        println("Warning (3)! The necklace is smaller than its initialisation!")
+        logerrors ? log_error("necklace-errors.txt", "Warning (3) for beam $b at q $q with ti $ti and tr $tr.") : nothing
     end
-    return necklace
+
+    
+    # counter = 0
+    # while ((enclosed_area(necklace,imag) + enclosed_area(necklace,real)) < 0.5) && 
+    #     counter < 4 && length(necklace) > Ninit+1
+
+    #     necklace = get_necklace_solver(b, Ip, q, ti, tr; Ninit = Ninit, Ncounter=Ncounter,
+    #     eigvecfactorinit = eigvecfactorinit*2, # I should come up with sophisticated guesses here.
+    #     flowstepfactor = flowstepfactor, 
+    #     subdividethreshold = subdividethreshold )
+
+    #     if counter==3 && logerrors
+    #         log_error("necklace-errors.txt", "Warning (1) for beam $b at q $q with ti $ti and tr $tr.")
+    #     end
+
+    #     Ncounter *= 2 # random other guess to improve the necklace finding
+    #     counter += 1
+    # end
+    # return necklace
 end;
