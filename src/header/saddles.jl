@@ -104,7 +104,7 @@ function find_saddles_sobol(q::Number;
         ### check conditions and deposit in array
         if check_sp(b, tiSP,trSP, tt_minimal = tt_minimal) == true && 
             in(tiSP, ti_cd) && # maybe I want this to be an option
-            in(trSP,tr_cd)
+            in(trSP, tr_cd)
             # &&new
             push!(saddles, Saddle(q, tiSP, trSP, p_stationary(b, tiSP, trSP)))
         end
