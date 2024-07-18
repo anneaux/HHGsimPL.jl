@@ -145,7 +145,7 @@ function initialise!(necklace::Vector{LineSeg},points::Vector{Point},
 
     # this could certainly be made more julian    
     eigenvectors = [[complex(vec[1:2]...), complex(vec[3:4]...)] for vec in eachcol(eigvecs(hessian))] 
-
+    # eigenvectors 3 and 4 are the ones with positive sign. So if I want the steepest ascent thimble, then I should use those.
     pointsini = ([[ti,tr] .+ ϵ * (cos(θ) * eigenvectors[3] + sin(θ) * eigenvectors[4]) for θ in range(0, stop=2π, length=Ninit+1)])
 
     push!(points, [Point(p[1], p[2]) for p in pointsini]...)
@@ -280,9 +280,14 @@ function get_necklace(b::Beam, Ip::Float64,
     
     if (enclosed_area(necklace,imag) + enclosed_area(necklace,real)) > enclosed_area_init
         return necklace
-    else 
-        println("Warning (3)! The necklace is smaller than its initialisation!")
-        logerrors ? log_error("necklace-errors.txt", "Warning (3) for beam $b at q $q with ti $ti and tr $tr.") : nothing
+    else
+        if (real(-im * S(b, Ip, ti, tr, q))) > -0.2
+            return necklace
+        else
+            println("Warning (3)! The necklace is smaller than its initialisation for beam $b at q $q with ti $ti and tr $tr, where h was $(real(-im * S(b, Ip, ti, tr, q)))!")
+            logerrors ? log_error("necklace-errors.txt", "Warning (3) for beam $b at q $q with ti $ti and tr $tr.") : nothing
+        end
+
     end
 
     

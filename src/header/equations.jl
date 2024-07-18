@@ -15,25 +15,35 @@ function S_v(b::Beam, Ip::Float64,
   )
 
   0.5 * quadgk(t -> scalarproduct2( p .+ A(b)(t) ), ti, tr)[1] + Ip * (tr - ti)
-
 end
 
 ## exponent = action
+# function S(b::Beam, Ip::Float64, 
+#   ti::ComplexF64, tr::ComplexF64, 
+#   q::Number,
+#   p::Vector{ComplexF64} = p_stationary(b, ti, tr)
+#   )
+  
+#   S_v(b, Ip, ti, tr , p) - q * b.omega1 * tr
+
+# end 
+
 function S(b::Beam, Ip::Float64, 
   ti::ComplexF64, tr::ComplexF64, 
   q::Number,
   p::Vector{ComplexF64} = p_stationary(b, ti, tr)
   )
-  
-  S_v(b, Ip, ti, tr , p) - q * b.omega1 * tr
-
-end 
+    
+    try
+        S_v_analytic(b, Ip, ti, tr) - q * b.omega1 * tr
+    catch e
+        S_v(b,Ip,ti,tr,p) - q * b.omega1 * tr
+    end
+end
 
 
 S_v(b::Beam, Ip::Float64, s::Saddle) = S_v(b, Ip, s.ti, s.tr, s.p) 
 S(b::Beam, Ip::Float64, s::Saddle) = S(b, Ip, s.ti, s.tr, s.q, s.p)
-
-## h und H function
 
 
 ### derivatives of the Volkov action

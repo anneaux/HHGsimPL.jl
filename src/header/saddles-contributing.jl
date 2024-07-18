@@ -30,7 +30,8 @@
         
         # finds local minima of the distances, filters for those where the height is <0.8, and returns the respective indices
     # https://docs.juliahub.com/Peaks/3TWUM/0.5.2/
-        peakindices = peakheights(findminima(distances), max = tolerance).indices 
+        intersections = findminima(distances) |> peakheights(;max = tolerance) |> peakproms(;min = 1.)
+        peakindices = intersections.indices
 
         if length(peakindices) == 1
            return peakindices[1]
@@ -38,7 +39,7 @@
             return nothing
         else
             @warn "I'm hitting the integration plane more than once I think"
-            log_error("necklace-hitting-ID-errors.txt", "Warning (2) for beam $(loginfo[1]) at q $(loginfo[2]) with ti $(loginfo[3]) and tr $(loginfo[4]).")
+            log_error("new-necklace-hitting-ID-errors.txt", "Warning (2) for beam $(loginfo[1]) at q $(loginfo[2]) with ti $(loginfo[3]) and tr $(loginfo[4]).")
             return peakindices[1]
         end
     end

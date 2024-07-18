@@ -1,5 +1,5 @@
 import ColorSchemes.turbo
-function harmonic_color(q::T, orders::Vector{T}) where T <: Real
+function harmonic_color(q::T1, orders::Vector{T2}) where {T1 <: Real, T2 <:Real}
     if (maximum(orders)-minimum(orders)) == 0.
         return :blue 
     else 

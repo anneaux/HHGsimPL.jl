@@ -157,3 +157,9 @@ function electric_field_amplitude_derivative(b::BeamOTC)
 
     return t -> (numerator(t) / denominator(t))
 end
+
+
+
+
+###############
+

@@ -58,8 +58,6 @@ function dipole(b::Beam, Ip::Float64, s::Saddle) ### new
 end
 
 
-
-
 function harmonic_intensity(b::Beam, dipX::Complex{Float64}, dipY::Complex{Float64}, q::Number;add_cc::Bool=false)
   if add_cc
     dipX += conj(dipX)
