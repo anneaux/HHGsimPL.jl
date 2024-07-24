@@ -146,7 +146,8 @@ function initialise!(necklace::Vector{LineSeg},points::Vector{Point},
     # this could certainly be made more julian    
     eigenvectors = [[complex(vec[1:2]...), complex(vec[3:4]...)] for vec in eachcol(eigvecs(hessian))] 
     # eigenvectors 3 and 4 are the ones with positive sign. So if I want the steepest ascent thimble, then I should use those.
-    pointsini = ([[ti,tr] .+ ϵ * (cos(θ) * eigenvectors[3] + sin(θ) * eigenvectors[4]) for θ in range(0, stop=2π, length=Ninit+1)])
+    pointsini = ([[ti,tr] .+ ϵ * (cos(θ) * eigenvectors[3] + sin(θ) * eigenvectors[4]) for θ in range(0, stop=2π, length=Ninit+1)])[1:end-1]
+    # because 0 and 2π are the same and I don't want the point twice, me stupid!!!
 
     push!(points, [Point(p[1], p[2]) for p in pointsini]...)
     push!(necklace, [LineSeg(i, i+1 , true) for i in 1:(length(points)-1)]...)
