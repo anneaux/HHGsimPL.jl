@@ -260,9 +260,9 @@ function get_necklace(b::Beam, Ip::Float64,
         q::Number,
         ti::ComplexF64, tr::ComplexF64
         ; Ninit::Int64=20, Ncounter::Int64=500,
-        eigvecfactorinit::Float64 = 0.02, # I should come up with sophisticated guesses here.
-        flowstepfactor::Float64 = 0.1, 
-        subdividethreshold::Float64 = 0.5,
+        eigvecfactorinit::Float64 = 0.04, # I should come up with sophisticated guesses here.
+        flowstepfactor::Float64 = 0.5, 
+        subdividethreshold::Float64 = 2.,
         logerrors::Bool=false )
     
    necklace = get_necklace_solver(b, Ip, q, ti, tr; Ninit=Ninit, Ncounter=Ncounter,

@@ -24,7 +24,7 @@
 	#     end
 	# end
 
-    function find_crossing(line::Vector{LineSeg}, point::Point{T}, tolerance::Float64=0.8;
+    function find_crossing(line::Vector{LineSeg}, point::Point{T}, tolerance::Float64=1.;
         loginfo=[]) where T<:Real
         distances = [distance_point_to_line(point, seg) for seg in line]
         
