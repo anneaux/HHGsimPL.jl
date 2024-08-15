@@ -30,8 +30,8 @@
         
         # finds local minima of the distances, filters for those where the height is <0.8, and returns the respective indices
     # https://docs.juliahub.com/Peaks/3TWUM/0.5.2/
-        intersections = findminima(vcat(distances, distances[1:20])) |> peakheights(;max = tolerance) |> peakproms(;min = 1.)
-        peakindices =  mod1.(intersections.indices, length(distances))
+        intersections = findminima(vcat(distances, distances[1:20])) |> peakheights(;max = tolerance) |> peakproms(;min = 0.5)
+        peakindices =  unique(mod1.(intersections.indices, length(distances)))
 
         if length(peakindices) == 1
            return peakindices[1]
