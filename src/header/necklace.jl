@@ -46,7 +46,7 @@ end
 	        q::Number,
 	        ti::ComplexF64, tr::ComplexF64)
 
-	    action(tvec) = real(-S_for_diff(b, Ip, tvec[1]+im*tvec[2],tvec[3]+im*tvec[4], q))
+	    action(tvec) = real(-S_for_diff(b, Ip, tvec[1]+im*tvec[2],tvec[3]+im*tvec[4], q)) # doesn't matter if I take real or imag there
 	    return FiniteDiff.finite_difference_hessian(action, [reim(ti)..., reim(tr)...])
 	end
 

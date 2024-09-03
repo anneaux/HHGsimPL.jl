@@ -107,6 +107,7 @@ function d2Sv_dti2(b::Beam,
 end 
 
 
+### mixed second derivative
 function d2Sv_dtitr(b::Beam, 
   ti::ComplexF64, tr::ComplexF64) 
   #pfun = -1/(tr-ti) * integral_over_A(ti,tr)
@@ -118,8 +119,11 @@ function d2Sv_dtitr(b::Beam,
     + scalarproduct( A(b)(ti), A(b)(tr) ) + 
     + inv_tau *inv_tau * scalarproduct2(integral)
     )
-
 end
+
+d2S_dtitr(b::Beam, ti::ComplexF64, tr::ComplexF64) = d2Sv_dtitr(b, ti, tr)
+d2S_dtitr(b::Beam, s::Saddle) = d2Sv_dtitr(b, s.ti, s.tr)
+
 
 
 ### just for consistency in the code
@@ -127,7 +131,9 @@ end
 
   d2Sv_dtr2(b::Beam, Ip::Float64, ti::ComplexF64, tr::ComplexF64) = d2Sv_dtr2(b::Beam, ti::ComplexF64,tr::ComplexF64) 
 
-  d2Sv_dtitr(b::Beam, Ip::Float64, ti::ComplexF64, tr::ComplexF64) = d2Sv_dtitr(b::Beam, ti::ComplexF64,tr::ComplexF64) 
+  d2Sv_dtitr(b::Beam, Ip::Float64, ti::ComplexF64, tr::ComplexF64) = d2Sv_dtitr(b::Beam, ti::ComplexF64,tr::ComplexF64)
+  d2S_dtitr(b::Beam, Ip::Float64, ti::ComplexF64, tr::ComplexF64) = d2S_dtitr(b::Beam, ti::ComplexF64, tr::ComplexF64)
+
 
 ### second derivatives of action S
   d2S_dti2(b::Beam, Ip::Float64, ti::ComplexF64, tr::ComplexF64) = d2Sv_dti2(b::Beam, ti::ComplexF64, tr::ComplexF64)

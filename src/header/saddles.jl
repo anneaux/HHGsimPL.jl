@@ -94,8 +94,8 @@ function find_saddles_sobol(q::Number;
     tr_seq = SobolSeq(reim(tr_cd.min),reim(tr_cd.max))
 
 	for i in 1:N
-        ti0 = next!(ti_seq)
-        tr0 = next!(tr_seq)
+        ti0 = Sobol.next!(ti_seq)
+        tr0 = Sobol.next!(tr_seq)
         
         t0 = [ti0[1]; ti0[2]; tr0[1]; tr0[2]]
 

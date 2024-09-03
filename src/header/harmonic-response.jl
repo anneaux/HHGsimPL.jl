@@ -17,9 +17,6 @@
 
 
 
-
-
-
 # using QuadGK
 
 
@@ -31,11 +28,13 @@ end
 
 ### hessian root 
 function hessian_determinant(b::Beam, Ip::Float64, ti::ComplexF64, tr::ComplexF64)
-    return d2S_dtr2(b, Ip, ti, tr) * d2S_dti2(b, Ip, ti, tr)
+  ### ffs I don't know why so far I never had this second term here
+    return d2S_dtr2(b, Ip, ti, tr) * d2S_dti2(b, Ip, ti, tr) - d2S_dtitr(beam, ti, tr) * d2S_dtitr(beam, ti, tr)
 end  
 
 function hessian_determinant(b::Beam, Ip::Float64, s::Saddle)
-    return d2S_dtr2(b, Ip, s.ti, s.tr) * d2S_dti2(b, Ip, s.ti, s.tr)
+    #d2S_dtr2(b, Ip, s.ti, s.tr) * d2S_dti2(b, Ip, s.ti, s.tr)
+    return hessian_determinant(b, Ip, s.ti, s.tr) 
 end
 
 
