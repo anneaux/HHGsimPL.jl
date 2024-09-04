@@ -29,7 +29,7 @@ end
 ### hessian root 
 function hessian_determinant(b::Beam, Ip::Float64, ti::ComplexF64, tr::ComplexF64)
   ### ffs I don't know why so far I never had this second term here
-    return d2S_dtr2(b, Ip, ti, tr) * d2S_dti2(b, Ip, ti, tr) - d2S_dtitr(beam, ti, tr) * d2S_dtitr(beam, ti, tr)
+    return d2S_dtr2(b, Ip, ti, tr) * d2S_dti2(b, Ip, ti, tr) - d2S_dtitr(b, ti, tr) * d2S_dtitr(b, ti, tr)
 end  
 
 function hessian_determinant(b::Beam, Ip::Float64, s::Saddle)
