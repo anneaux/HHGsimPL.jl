@@ -79,6 +79,13 @@ end
     imag(ls::LineSeg) = LineSeg(imag(ls.s),imag(ls.e), ls.active)
     real(ls::LineSeg) = LineSeg(real(ls.s),real(ls.e), ls.active);
 
+    import LinearAlgebra.norm
+    function norm(ls::LineSeg)
+        norm([ls.e.x, ls.e.y] .- [ls.s.x, ls.s.y] )
+    end
+
+
+
     function get_point(ls::LineSeg, which::Symbol=:s)
         if which==:s
             return Point(ls.s.x, ls.s.y)
@@ -212,10 +219,10 @@ end;
 function get_necklace_solver(b::Beam, Ip::Float64,
         q::Number,
         ti::ComplexF64, tr::ComplexF64
-        ; Ninit::Int64=20, Ncounter::Int64=500,
-        eigvecfactorinit::Float64 = 0.02, # I should come up with sophisticated guesses here.
-        flowstepfactor::Float64 = 0.1, 
-        subdividethreshold::Float64 = 0.5 )
+        ; Ninit::Int64=20, Ncounter::Int64=600,
+        eigvecfactorinit::Float64 = 0.04, # I should come up with sophisticated guesses here.
+        flowstepfactor::Float64 = 0.5, 
+        subdividethreshold::Float64 = 2.0 )
        
     necklace = Vector{LineSeg}()
     points = Vector{Point}()
@@ -259,23 +266,29 @@ end;
 function get_necklace(b::Beam, Ip::Float64,
         q::Number,
         ti::ComplexF64, tr::ComplexF64
-        ; Ninit::Int64=20, Ncounter::Int64=500,
-        eigvecfactorinit::Float64 = 0.04, # I should come up with sophisticated guesses here.
-        flowstepfactor::Float64 = 0.5, 
-        subdividethreshold::Float64 = 2.,
-        logerrors::Bool=false )
+        ; 
+        logerrors::Bool=false,
+        kwargs...
+        )
+        # Ninit::Int64=20, Ncounter::Int64=500,
+        # eigvecfactorinit::Float64 = 0.04, # I should come up with sophisticated guesses here.
+        # flowstepfactor::Float64 = 0.5, 
+        # subdividethreshold::Float64 = 2.,
+        # )
     
-   necklace = get_necklace_solver(b, Ip, q, ti, tr; Ninit=Ninit, Ncounter=Ncounter,
-        eigvecfactorinit = eigvecfactorinit, # I should come up with sophisticated guesses here.
-        flowstepfactor = flowstepfactor, 
-        subdividethreshold = subdividethreshold )
+   necklace = get_necklace_solver(b, Ip, q, ti, tr; kwargs...)
+    # Ninit=Ninit, Ncounter=Ncounter,
+    #     eigvecfactorinit = eigvecfactorinit, # I should come up with sophisticated guesses here.
+    #     flowstepfactor = flowstepfactor, 
+    #     subdividethreshold = subdividethreshold )
     # I think there's a good julian way to pass on the kwargs
 
 
-    necklace_init = get_necklace_solver(b, Ip, q, ti, tr; Ninit = Ninit, Ncounter=1,
-        eigvecfactorinit = eigvecfactorinit, # I should come up with sophisticated guesses here.
-        flowstepfactor = flowstepfactor, 
-        subdividethreshold = subdividethreshold )
+    necklace_init = get_necklace_solver(b, Ip, q, ti, tr; kwargs..., Ncounter =1)
+        # Ninit = Ninit, Ncounter=1,
+        # eigvecfactorinit = eigvecfactorinit, # I should come up with sophisticated guesses here.
+        # flowstepfactor = flowstepfactor, 
+        # subdividethreshold = subdividethreshold )
     
     enclosed_area_init = enclosed_area(necklace_init,imag) + enclosed_area(necklace_init,real)
     

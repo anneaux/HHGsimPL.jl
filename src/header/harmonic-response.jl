@@ -1,9 +1,6 @@
 # ### everything dipole and harmonic field
 
 
-
-
-
 # ########
 
 # function harmonic_field(dipole::Vector{ComplexF64}, ϕ::Float64)

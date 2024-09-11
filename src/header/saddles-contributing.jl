@@ -26,13 +26,18 @@
 
     function find_crossing(line::Vector{LineSeg}, point::Point{T}, tolerance::Float64=1.;
         loginfo=[]) where T<:Real
+
         distances = [distance_point_to_line(point, seg) for seg in line]
         
         # finds local minima of the distances, filters for those where the height is <0.8, and returns the respective indices
     # https://docs.juliahub.com/Peaks/3TWUM/0.5.2/
-        intersections = findminima(vcat(distances, distances[1:20])) |> peakheights(;max = tolerance) |> peakproms(;min = 0.5)
+        intersections = findminima(vcat(distances, distances[1:min(20, length(distances))])) |> peakheights(;max = tolerance) |> peakproms(;min = 0.5)
         peakindices =  unique(mod1.(intersections.indices, length(distances)))
 
+        ### double-check that peaks are smaller than norm, think: adaptive tolerance for peak height. averaging over norms in that region because otherwise sometimes I'm unlucky
+
+        filter!(pidx -> distances[pidx] < sum([norm(ls) for ls in line[mod1.(collect(pidx-2:pidx+2), length(line))]])/5, peakindices)
+ 
         if length(peakindices) == 1
            return peakindices[1]
         elseif length(peakindices) == 0
@@ -125,15 +130,26 @@ function check_contribution(necklace::Vector{LineSeg},
     return active
 end;
 
+function check_contribution(necklace::Nothing, 
+    b::Beam, Ip::Float64,
+    q::Number,
+    ti::ComplexF64, tr::ComplexF64,
+    ti_cd::ComplexDomain, tr_cd::ComplexDomain
+    ; Ntimes = 100 )
+    return false
+end
+
+
 
 function check_contribution(b::Beam, Ip::Float64,
 	q::Number,
 	ti::ComplexF64, tr::ComplexF64,
     ti_cd::ComplexDomain, tr_cd::ComplexDomain
-    ; Ntimes = 100, Ncounter = 600, logerrors::Bool=false)
+    ; Ntimes::Int64 = 100, logerrors::Bool=false, kwargs...)
+    # Ncounter = 600, logerrors::Bool=false)
     
     if real(-im * S(b, Ip, ti, tr, q)) < 0
-        necklace = get_necklace(b, Ip, q, ti, tr, Ncounter = Ncounter, logerrors= logerrors)
+        necklace = get_necklace(b, Ip, q, ti, tr; logerrors=logerrors, kwargs...)
         check_contribution(necklace, b, Ip, q, ti, tr, ti_cd, tr_cd, Ntimes = Ntimes)
     else 
         @debug "it doesn't contribute! (0)"
