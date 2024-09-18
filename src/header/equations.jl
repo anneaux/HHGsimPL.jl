@@ -140,7 +140,7 @@ d2S_dtitr(b::Beam, s::Saddle) = d2Sv_dtitr(b, s.ti, s.tr)
   d2S_dti2(b::Beam, ti::ComplexF64, tr::ComplexF64) = d2Sv_dti2(b::Beam, ti::ComplexF64, tr::ComplexF64)
 
   d2S_dtr2(b::Beam, Ip::Float64, ti::ComplexF64, tr::ComplexF64) = d2Sv_dtr2(b::Beam, ti::ComplexF64, tr::ComplexF64)
-
+  d2S_dtr2(b::Beam, Ip::Float64, q::Number, ti::ComplexF64, tr::ComplexF64) = d2S_dtr2(b, Ip, ti, tr)
 
 ### third drv of the action
 # TODO 

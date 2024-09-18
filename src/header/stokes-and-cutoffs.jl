@@ -65,7 +65,6 @@ function solve_Thceqs(t0::Vector{T},
             F[2] = real(thceq2(b, Ip, x[1]+x[2]*im, x[3]+x[4]*im))
             F[3] = imag(thceq1(b, Ip, x[1]+x[2]*im, x[3]+x[4]*im))
             F[4] = imag(thceq2(b, Ip, x[1]+x[2]*im, x[3]+x[4]*im))
-
         end
 
         result = nlsolve(thceqs!, t0)#, method = :trust_region, factor =fac )#, ftol = 1e-13)#, method = :anderson)
@@ -103,7 +102,7 @@ function find_thcs_sobol(b::Beam, Ip::Real,
         tihc0 = next!(ti_seq)
         trhc0 = next!(tr_seq)
         
-    thc0 = [tihc0[1]; tihc0[2]; trhc0[1]; trhc0[2]]
+        thc0 = [tihc0[1]; tihc0[2]; trhc0[1]; trhc0[2]]
 
         tihc, trhc = solve_Thceqs(thc0, beam, Ip, 5)
 
