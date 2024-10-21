@@ -14,8 +14,7 @@ struct Thc
 end
 
 
-Base.show(io::IO, thc::Thc) = println(io,
-    "tihc: $(round((thc.tihc),sigdigits=5)), trhc: $(round((thc.trhc),sigdigits=5)), qhc: $(round((thc.qhc),sigdigits=5))")
+Base.show(io::IO, thc::Thc) = println(io, "tihc: $(round((thc.tihc),sigdigits=5)), trhc: $(round((thc.trhc),sigdigits=5)), qhc: $(round((thc.qhc),sigdigits=5))")
 
 
 ### thc equations ###########

@@ -23,16 +23,31 @@ function dipole_SR_conj(k::Vector{ComplexF64}, Ip::Float64)
   return (im *sqrt(2))/  (pi* ka) * k / (scalarproduct2(k) + ka^2 )^2
 end
 
-### hessian root 
-function hessian_determinant(b::Beam, Ip::Float64, ti::ComplexF64, tr::ComplexF64)
-  ### ffs I don't know why so far I never had this second term here
-    return d2S_dtr2(b, Ip, ti, tr) * d2S_dti2(b, Ip, ti, tr) - d2S_dtitr(b, ti, tr) * d2S_dtitr(b, ti, tr)
-end  
+# ### hessian root ### F*** THIS!!! THIS HAS A BRANCH CUT! see Emilio's RBSFA werid handling of it
+# function hessian_determinant(b::Beam, Ip::Float64, ti::ComplexF64, tr::ComplexF64)
+#   ### ffs I don't know why so far I never had this second term here
+#     return d2S_dtr2(b, Ip, ti, tr) * d2S_dti2(b, Ip, ti, tr) - d2S_dtitr(b, ti, tr) * d2S_dtitr(b, ti, tr)
+# end  
 
-function hessian_determinant(b::Beam, Ip::Float64, s::Saddle)
-    #d2S_dtr2(b, Ip, s.ti, s.tr) * d2S_dti2(b, Ip, s.ti, s.tr)
-    return hessian_determinant(b, Ip, s.ti, s.tr) 
+# function hessian_determinant(b::Beam, Ip::Float64, s::Saddle)
+#     #d2S_dtr2(b, Ip, s.ti, s.tr) * d2S_dti2(b, Ip, s.ti, s.tr)
+#     return hessian_determinant(b, Ip, s.ti, s.tr) 
+# end
+
+
+function hessian_root(b::Beam, Ip::Float64, ti::ComplexF64, tr::ComplexF64)
+#     (im * 2*π/sqrt(hessian_determinant(b, Ip, s))
+    sqrt1 = sqrt(2π/ (im*d2S_dti2(b, Ip, ti, tr) ))
+    sqrt2 = sqrt(2π * d2S_dti2(b, Ip, ti, tr) / (im*(d2S_dtr2(b, Ip, ti, tr) * d2S_dti2(b, Ip, ti, tr) - d2S_dtitr(b, ti, tr) * d2S_dtitr(b, ti, tr))) )
+    
+    return sqrt1 * sqrt2       
+        
 end
+
+function hessian_root(b::Beam, Ip::Float64, s::Saddle)
+    return hessian_root(b, Ip, s.ti, s.tr)
+end
+
 
 
 function dipole(b::Beam, Ip::Float64, s::Saddle) ### new 
@@ -41,9 +56,10 @@ function dipole(b::Beam, Ip::Float64, s::Saddle) ### new
  
   fontaine_SR_m0 = 1 / (kappa(Ip) * sqrt(2) * π)
 
-  prefactor = (im * 2*π/sqrt(hessian_determinant(b, Ip, s))) # corresponds to HessianRoot in RBSFA
+  prefactor = hessian_root(b, Ip, s) # corresponds to HessianRoot in RBSFA
   prefactor *= (2*π/(im*traveltime))^(3/2) # spreading factor
   prefactor *= fontaine_SR_m0
+
   # transpose(conj.(dip_i)) * E(s.ti) # fontaine
   # prefactor *= sum(dip_i .* E(s.ti))
 
