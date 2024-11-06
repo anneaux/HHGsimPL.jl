@@ -4,7 +4,7 @@ Pkg.activate("..")
 using QuadGK
 using Sobol
 using NLsolve
-using Plots
+# using Plots
 
 using LinearAlgebra
 using Integrals

@@ -221,8 +221,8 @@ function get_necklace_solver(b::Beam, Ip::Float64,
         ti::ComplexF64, tr::ComplexF64
         ; Ninit::Int64=20, Ncounter::Int64=600,
         eigvecfactorinit::Float64 = 0.04, # I should come up with sophisticated guesses here.
-        flowstepfactor::Float64 = 0.5, 
-        subdividethreshold::Float64 = 2.0 )
+        flowstepfactor::Float64 = 0.4, 
+        subdividethreshold::Float64 = 1.8 )
        
     necklace = Vector{LineSeg}()
     points = Vector{Point}()
@@ -300,6 +300,7 @@ function get_necklace(b::Beam, Ip::Float64,
         else
             println("Warning (3)! The necklace is smaller than its initialisation for beam $b at q $q with ti $ti and tr $tr, where h was $(real(-im * S(b, Ip, ti, tr, q)))!")
             logerrors ? log_error("necklace-errors.txt", "Warning (3) for beam $b at q $q with ti $ti and tr $tr.") : nothing
+            return nothing
         end
 
     end
