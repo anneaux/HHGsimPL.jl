@@ -14,21 +14,26 @@ struct Thc
 end
 
 
-Base.show(io::IO, thc::Thc) = println(io, "tihc: $(round((thc.tihc),sigdigits=5)), trhc: $(round((thc.trhc),sigdigits=5)), qhc: $(round((thc.qhc),sigdigits=5))")
+Base.show(io::IO, thc::Thc) = print(io, "tihc: $(round((thc.tihc),sigdigits=5)), trhc: $(round((thc.trhc),sigdigits=5)), qhc: $(round((thc.qhc),sigdigits=5))")
+
+import Base./
+function /(thc::Thc, TC::Real)
+    return Thc(thc.tihc/TC, thc.trhc/TC, thc.qhc)
+end
 
 
 ### thc equations ###########
 
 function thceq1(b::Beam, Ip::Float64,
   ti::ComplexF64, tr::ComplexF64) ### derived from eq. 15 in Emilio's paper
-
+    ### this is the determinant of the deformation tensor
   return d2Sv_dtr2(b, Ip, ti,tr) * d2Sv_dti2(b, Ip, ti,tr) - d2Sv_dtitr(b, Ip, ti,tr) * d2Sv_dtitr(b, Ip, ti,tr)
 end
 
 
 function thceq2(b::Beam, Ip::Float64,
   ti::ComplexF64,tr::ComplexF64)
-
+    ### what is this actually? why?
   return dSv_dti(b, Ip, ti,tr)
 end
 

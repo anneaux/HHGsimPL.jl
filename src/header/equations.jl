@@ -57,7 +57,7 @@ function dSv_dtr(b::Beam, Ip::Float64,
 end 
 
 function dSv_dti(b::Beam, Ip::Float64, 
-  ti::ComplexF64,tr::ComplexF64)
+  ti::ComplexF64, tr::ComplexF64)
   # inv_tau = 1/(tr - ti)
   # IA = integral_over_A(ti,tr)
   ki = p_stationary(b, ti, tr) .+ A(b)(ti)
@@ -86,7 +86,9 @@ function dS_dti(b::Beam, Ip::Float64,
   return  dSv_dti(b, Ip, ti, tr)
 end
 
-### second drv of the action
+
+
+### second drv of the Volkov action
 function d2Sv_dtr2(b::Beam,
   ti::ComplexF64,tr::ComplexF64)
 
@@ -162,7 +164,7 @@ end
 
 speq1(b::Beam, Ip::Float64, ti::ComplexF64, tr::ComplexF64) = speq1(b, Ip, real(ti),imag(ti),real(tr),imag(tr))
 
-# this is actually just S_drv = S_V_drv(p,tr) -q*omega
+# this is actually just S_drv = S_V_drv(p,tr) - q*omega
 function speq2(b::Beam, Ip::Float64,
   q::Number, 
   tir::Float64, tii::Float64, trr::Float64, tri::Float64

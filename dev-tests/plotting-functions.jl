@@ -85,6 +85,17 @@ function plot_sp_times_cp(b::Beam, saddles::Vector{Saddle},
     return plot_sp_times_cp(saddleTups, TC, thcs, ti_cd, tr_cd, tt_cd)
 end
 
+function plot_sp_times_cp(saddles::Vector{Saddle})
+
+    saddleTups = [(s,true) for s in saddles]
+
+    return plot_sp_times_cp(saddleTups)
+end
+
+
+
+
+
 
 function plot_sp_times_cp(b::Beam, saddles_dict::Dict{T,Vector{Saddle}},
         thcs::Vector{Thc}=Vector{Thc}(),
