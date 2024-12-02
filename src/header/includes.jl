@@ -17,6 +17,10 @@ using Peaks
 
 include("utils.jl")
 include("beams.jl")
+include("Beams/BeamMono.jl")
+include("Beams/BeamTC.jl")
+include("Beams/BeamOTC.jl")
+
 
 include("saddles.jl")
 include("equations.jl")
