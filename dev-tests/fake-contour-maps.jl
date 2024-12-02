@@ -276,7 +276,7 @@ function plot_action_contours(beam::Beam,
         trr_values = range(real(str) - rg, stop = real(str) + rg, length=51)
         tri_values = range(imag(str) - rg, stop = imag(str) + rg, length=51)
 
-#         println("step tri: ", tri_values[2]-tri_values[1])
+    #         println("step tri: ", tri_values[2]-tri_values[1])
         ti = s.ti
 
         S_values = [S(beam, Ip, ti, tr, q) for tr in (trr_values' .+ im*tri_values)]
