@@ -138,7 +138,25 @@ function find_saddle_similar_seed(q::Number, seed::Saddle;
     end
 end;
 
+function find_saddle_similar_seed(q::Number, ti::ComplexF64, tr::ComplexF64;
+        b::Beam, Ip::Real,
+        ti_cd::Union{ComplexDomain,Nothing}=nothing,
+        tr_cd::Union{ComplexDomain,Nothing}=nothing, 
+        tt_minimal::Float64 = 0.005,
+        beam::Beam=b ) # number of seeds generated per domain
+    
+    roundDigits = 2
+    t0 = [reim(ti)... , reim(tr)...]
 
+    tiSP, trSP = solve_SPEqs(q, t0, beam, Ip, roundDigits) # last arg: rounddigits
+
+    if check_sp(b, tiSP, trSP, tt_minimal = tt_minimal) && 
+        ( !isnothing(ti_cd) ? (in(tiSP, ti_cd) && in(trSP,tr_cd)) : true)
+        return Saddle(q, tiSP, trSP, p_stationary(b, tiSP,trSP))
+    else 
+        return nothing
+    end
+end;
 
 
 
