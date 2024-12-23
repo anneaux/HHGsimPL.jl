@@ -1,6 +1,8 @@
 include("../src/header/includes.jl")
 using Plots
 using LaTeXStrings
+### if I ever get round to using Stefanos' very nice package for electric fields...
+
 
 ### would be nice to have a plot here that simply shows the field for a given configuration
 # field = get_field_XZ(intratio=2.,ϕ=0.)

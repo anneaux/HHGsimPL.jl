@@ -11,7 +11,7 @@ end;
 
 ### utils
 mutable struct Index
-    coord::Vector{Int}
+    coord::Vector{Int} ### this could be an MVector
     active::Bool
     Index(coord::Vector{Int64}) = new(coord, true)
 end

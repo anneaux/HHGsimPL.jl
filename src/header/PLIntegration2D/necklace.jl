@@ -1,56 +1,3 @@
-# I guess I could at some point use this for the usual calculation of SV as well
-function S_v_for_diff(b::Beam, Ip::Float64, 
-  ti::Complex, tr::Complex, 
-  p::Vector = p_stationary(b, ti, tr)
-  )
-    domain = (ti,tr)
-    prob = IntegralProblem((t,x) -> scalarproduct2( p .+ A(b)(t) ), domain)
-    integral = solve(prob, QuadGKJL())[1]
-  return 0.5 * integral + Ip * (tr - ti)
-end
-
-function S_for_diff(b::Beam, Ip::Float64, 
-  ti::Complex, tr::Complex, 
-  q::Number,
-  p::Vector = p_stationary(b, ti, tr)
-  )
-  
-  S_v_for_diff(b, Ip, ti, tr , p) - q* b.omega1 * tr
-end
-
-### grads and hessians
-
-	function grad(b::Beam, Ip::Float64,
-	    q::Number,
-	    ti::ComplexF64, tr::ComplexF64)
-
-	    g = [dS_dti(b,Ip,q,ti,tr); dS_dtr(b,Ip,q,ti,tr)]
-	    g = conj.(complex.(-1im .* g))
-	    return g
-	end
-
-	function gradN(b::Beam, Ip::Float64,
-	    q::Number,
-	    ti::ComplexF64, tr::ComplexF64,
-	    thresh::Float64 = 1.)
-
-	    g = grad(b,Ip,q,ti,tr)
-	    if norm(g) > thresh # bit lower than the gradient at the saddle point
-	        return LinearAlgebra.normalize(g)
-	    else 
-	        return g
-	    end
-	end;
-
-	function my_hessian(b::Beam, Ip::Float64,
-	        q::Number,
-	        ti::ComplexF64, tr::ComplexF64)
-
-	    action(tvec) = real(-S_for_diff(b, Ip, tvec[1]+im*tvec[2], tvec[3]+im*tvec[4], q)) # doesn't matter if I take real or imag there
-	    return FiniteDiff.finite_difference_hessian(action, [reim(ti)..., reim(tr)...])
-	end
-
-
 ### point and lineseg
 	mutable struct Point{T}
 	    x::T
@@ -85,7 +32,6 @@ end
     end
 
 
-
     function get_point(ls::LineSeg, which::Symbol=:s)
         if which==:s
             return Point(ls.s.x, ls.s.y)
@@ -116,6 +62,8 @@ end
         return sorted_linesegs
     end
 
+
+
 ### simple Gauss area formula to find the area enclosed by the necklace (to double-check if it's not got folded into itself)
 function enclosed_area(linesegs::Vector{LineSeg}, f::Function = x -> real(x))
     # Initialize the area accumulator
@@ -140,18 +88,45 @@ function enclosed_area(linesegs::Vector{LineSeg}, f::Function = x -> real(x))
 end
 
 
+function gradN(
+    f_grad::Function,
+    # b::Beam, Ip::Float64,
+    # q::Number,
+    ti::ComplexF64, tr::ComplexF64,
+    thresh::Float64 = 1.)
+
+    g = f_grad(ti,tr)
+    if norm(g) > thresh # bit lower than the gradient at the saddle point
+        return LinearAlgebra.normalize(g)
+    else 
+        return g
+    end
+end;
+
+
+
+
+
+
+
+
+
 ### necklacy things
-function initialise!(necklace::Vector{LineSeg},points::Vector{Point},
-        b::Beam, Ip::Float64,
-        q::Number,
+function initialise!(necklace::Vector{LineSeg}, points::Vector{Point},
+        # f::Function,
+        # f_drv::Function,
+        # b::Beam, Ip::Float64,
+        # q::Number,
         ti::ComplexF64, tr::ComplexF64;
+        f_hessian::Function,
         Ninit::Int64 = 20,
         ϵ::Float64 = 0.01)
 
-    hessian = my_hessian(b,Ip,q,ti,tr)
+    hessian = f_hessian(ti, tr) #my_hessian(b,Ip,q,ti,tr)
 
     # this could certainly be made more julian    
-    eigenvectors = [[complex(vec[1:2]...), complex(vec[3:4]...)] for vec in eachcol(eigvecs(hessian))] 
+    eigenvectors = [[complex(vec[1:2]...), complex(vec[3:4]...)] for vec in eachcol(eigvecs(hessian))]
+
     # eigenvectors 3 and 4 are the ones with positive sign. So if I want the steepest ascent thimble, then I should use those.
     pointsini = ([[ti,tr] .+ ϵ * (cos(θ) * eigenvectors[3] + sin(θ) * eigenvectors[4]) for θ in range(0, stop=2π, length=Ninit+1)])[1:end-1]
     # because 0 and 2π are the same and I don't want the point twice, me stupid!!!
@@ -189,8 +164,11 @@ function subdivide!(lineseg::LineSeg,
 end
 
 function flow!(necklace::Vector{LineSeg}, points::Vector{Point},
-        b::Beam, Ip::Float64,
-        q::Number;
+        f::Function,
+        f_grad::Function
+        # b::Beam, Ip::Float64,
+        # q::Number
+        ;
         δ::Float64=0.1,
         threshold::Float64=0.5
         )
@@ -199,9 +177,11 @@ function flow!(necklace::Vector{LineSeg}, points::Vector{Point},
         # TODO check both real and imaginary part?
         if points[i].active # for the active points
             # set them to be active (= still flowing) if they are above threshold
-            points[i].active = real(-im * S(b, Ip, points[i].x, points[i].y, q)) < 0 #(in Job's code that's h-function > thresh, I should clearly state which sign I'm using where etc.) 
+            # points[i].active = real(-im * S(b, Ip, points[i].x, points[i].y, q)) < 0 #(in Job's code that's h-function > thresh, I should clearly state which sign I'm using where etc.) 
+            points[i].active = real(f(points[i].x, points[i].y)) < 0 #(in Job's code that's h-function > thresh, I should clearly state which sign I'm using where etc.) 
+
             if points[i].active
-                step = δ .* gradN(b, Ip, q, points[i].x, points[i].y, threshold)
+                step = δ .* gradN(f_grad, points[i].x, points[i].y, threshold)
                 points[i].x += step[1]
                 points[i].y += step[2]
             end
@@ -216,8 +196,11 @@ function adorn_necklace!(necklace::Vector{LineSeg}, points::Vector{Point})
 end;
 
 ### get necklace
-function get_necklace_solver(b::Beam, Ip::Float64,
-        q::Number,
+function get_necklace_solver(f::Function,
+    f_grad::Function,
+    f_hessian::Function,
+    # b::Beam, Ip::Float64,
+    #     q::Number,
         ti::ComplexF64, tr::ComplexF64
         ; Ninit::Int64=20, Ncounter::Int64=600,
         eigvecfactorinit::Float64 = 0.04, # I should come up with sophisticated guesses here.
@@ -227,10 +210,10 @@ function get_necklace_solver(b::Beam, Ip::Float64,
     necklace = Vector{LineSeg}()
     points = Vector{Point}()
 
-    initialise!(necklace, points, b, Ip, q, ti, tr, Ninit = Ninit, ϵ = eigvecfactorinit)
+    initialise!(necklace, points, ti, tr, f_hessian = f_hessian, Ninit = Ninit, ϵ = eigvecfactorinit)
 
     ### find a suitable threshold for the normalisation of the gradient
-    gradient0 = [norm(grad(b,Ip,q, p.x, p.y)) for p in points]
+    gradient0 = [norm(f_grad(p.x, p.y)) for p in points]
     threshold = round(minimum(gradient0), RoundDown, sigdigits=2)
     
     counter = 0
@@ -239,7 +222,7 @@ function get_necklace_solver(b::Beam, Ip::Float64,
         counter += 1
 
         tmp = deepcopy(necklace)
-        flow!(necklace, points, b, Ip, q, threshold = threshold, δ = flowstepfactor)
+        flow!(necklace, points, f, f_grad, threshold = threshold, δ = flowstepfactor)
 
         if count([p.active for p in points]) == 0
             @debug "I broke because the flow stopped after $counter iterations"
@@ -253,7 +236,7 @@ function get_necklace_solver(b::Beam, Ip::Float64,
     end
         
     if counter == Ncounter && Ncounter > 1
-        println("I broke because the counter reached its max, i.e. $Ncounter for q$q")
+        println("I broke because the counter reached its max, i.e. $Ncounter.")
     end
 
     necklace = sort_linesegs(necklace)
@@ -263,8 +246,11 @@ function get_necklace_solver(b::Beam, Ip::Float64,
 end;
 
 
-function get_necklace(b::Beam, Ip::Float64,
-        q::Number,
+function get_necklace(f::Function,
+    f_grad::Function,
+    f_hessian::Function,
+    # b::Beam, Ip::Float64,
+    #     q::Number,
         ti::ComplexF64, tr::ComplexF64
         ; 
         logerrors::Bool=false,
@@ -276,7 +262,9 @@ function get_necklace(b::Beam, Ip::Float64,
         # subdividethreshold::Float64 = 2.,
         # )
     
-   necklace = get_necklace_solver(b, Ip, q, ti, tr; kwargs...)
+    # @show f_hessian(ti, tr)
+
+   necklace = get_necklace_solver(f, f_grad, f_hessian, ti, tr; kwargs...)
     # Ninit=Ninit, Ncounter=Ncounter,
     #     eigvecfactorinit = eigvecfactorinit, # I should come up with sophisticated guesses here.
     #     flowstepfactor = flowstepfactor, 
@@ -284,7 +272,7 @@ function get_necklace(b::Beam, Ip::Float64,
     # I think there's a good julian way to pass on the kwargs
 
 
-    necklace_init = get_necklace_solver(b, Ip, q, ti, tr; kwargs..., Ncounter =1)
+    necklace_init = get_necklace_solver(f, f_grad, f_hessian, ti, tr; kwargs..., Ncounter =1)
         # Ninit = Ninit, Ncounter=1,
         # eigvecfactorinit = eigvecfactorinit, # I should come up with sophisticated guesses here.
         # flowstepfactor = flowstepfactor, 
@@ -295,11 +283,11 @@ function get_necklace(b::Beam, Ip::Float64,
     if (enclosed_area(necklace,imag) + enclosed_area(necklace,real)) > enclosed_area_init
         return necklace
     else
-        if (real(-im * S(b, Ip, ti, tr, q))) > -0.2
+        if (real(f(ti, tr))) > -0.2
             return necklace
         else
-            println("Warning (3)! The necklace is smaller than its initialisation for beam $b at q $q with ti $ti and tr $tr, where h was $(real(-im * S(b, Ip, ti, tr, q)))!")
-            logerrors ? log_error("necklace-errors.txt", "Warning (3) for beam $b at q $q with ti $ti and tr $tr.") : nothing
+            # println("Warning (3)! The necklace is smaller than its initialisation for beam $b at q $q with ti $ti and tr $tr, where h was $(real(-im * S(b, Ip, ti, tr, q)))!")
+            # logerrors ? log_error("necklace-errors.txt", "Warning (3) for beam $b at q $q with ti $ti and tr $tr.") : nothing
             return nothing
         end
 
@@ -324,3 +312,6 @@ function get_necklace(b::Beam, Ip::Float64,
     # end
     # return necklace
 end;
+
+
+nothing
