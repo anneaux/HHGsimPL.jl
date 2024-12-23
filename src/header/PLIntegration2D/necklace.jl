@@ -286,6 +286,7 @@ function get_necklace(f::Function,
         if (real(f(ti, tr))) > -0.2
             return necklace
         else
+            @warn ("Warning (3)! The necklace is smaller than its initialisation")
             # println("Warning (3)! The necklace is smaller than its initialisation for beam $b at q $q with ti $ti and tr $tr, where h was $(real(-im * S(b, Ip, ti, tr, q)))!")
             # logerrors ? log_error("necklace-errors.txt", "Warning (3) for beam $b at q $q with ti $ti and tr $tr.") : nothing
             return nothing

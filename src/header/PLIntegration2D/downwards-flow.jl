@@ -8,7 +8,6 @@ function point2vec(p::Point)
 end;
 
 
-
 ### utils
 mutable struct Index
     coord::Vector{Int} ### this could be an MVector
@@ -160,7 +159,7 @@ function initialise_grid(timin::ComplexF64, timax::ComplexF64, ttmin::ComplexF64
         Point(timax, timax+ttmin)]    
     simplices = [Index([1,2,3,4])]
     
-###     subdivide_2(points, simplices, Δ) # instead of calling this I'll do it here directly
+    ###     subdivide_2(points, simplices, Δ) # instead of calling this I'll do it here directly
     n_old = length(simplices)
     n_new = 0 #n_old - 1
     
@@ -177,8 +176,10 @@ end
 ### flow down
 
 function flow_down!(simplices::Vector{Index},points::Vector{Point{T}},
-        b::Beam, Ip::Float64,
-        q::Number;
+        f::Function,
+        f_grad::Function;
+        # b::Beam, Ip::Float64,
+        # q::Number;
         threshold::Float64=0.5, # for normalisation of thr gradient
         δ::Float64=0.5, # flowstepfactor
         h_threshold::Float64=-20.
@@ -186,7 +187,7 @@ function flow_down!(simplices::Vector{Index},points::Vector{Point{T}},
 
     for i1 in 1:length(points)
         if points[i1].active # for the active points
-            step = -δ .* gradN(b, Ip, q, points[i1].x +0im, points[i1].y +0im, threshold)
+            step = -δ .* gradN(f_grad, points[i1].x +0im, points[i1].y +0im, threshold)
             points[i1].x += step[1]
             points[i1].y += step[2]
         end
@@ -195,7 +196,7 @@ function flow_down!(simplices::Vector{Index},points::Vector{Point{T}},
     for i2 in eachindex(simplices)
         if simplices[i2].active
             for v in simplices[i2].coord
-                if real(-im * S(b, Ip, points[v].x, points[v].y, q)) < h_threshold 
+                if real(f(points[v].x, points[v].y)) < h_threshold 
                     simplices[i2].active = false # am I sure that I want to turn the whole simplex inactive?
                     points[v].active = false
                 end
@@ -228,8 +229,11 @@ end
 
 
 ### get simplices
-function get_simplices(beam::Beam, Ip::Float64,
-    q::Number,
+function get_simplices(
+    f::Function,
+    f_grad::Function,
+    # beam::Beam, Ip::Float64,
+    # q::Number,
     timin::Number, timax::Number,
     ttmin::Number, ttmax::Number;
     Nflow::Int64=50,
@@ -249,7 +253,7 @@ function get_simplices(beam::Beam, Ip::Float64,
     for i_flow in 1:Nflow
         nsimplices = length(simplices)
         # println(netsimplices)
-        flow_down!(simplices, points, beam, Ip, q,
+        flow_down!(simplices, points, f, f_grad,
                 threshold = gradnthreshold, δ=flowstepfactor, h_threshold = h_threshold)
         subdivide(points, simplices, subdividethreshold)
 
@@ -305,12 +309,17 @@ function jacobian(p::Vector{Float64}, p1::Point, p2::Point, p3::Point, p4::Point
     return (A + B * p[1] + C * p[2]) / 8.
 end;
 
-function integrate_quadrilateral(b::Beam, Ip::Float64,
-        q::Number,
-        quad::Quadrilateral, n::Int64=7)
+function integrate_quadrilateral(
+    f::Function,
+    # b::Beam, Ip::Float64,
+    #     q::Number,
+    quad::Quadrilateral, n::Int64=7;
+    prefactor::Function=tvec->1.
+    )
     
         p1, p2, p3, p4 = quad.points
-        Sfunction(tvec) = S(b, Ip, tvec[1], tvec[2], q)
+
+        f_vec(tvec) = f(tvec[1], tvec[2])
     
         x, w = gausslegendre(n);
         y = x;
@@ -319,18 +328,9 @@ function integrate_quadrilateral(b::Beam, Ip::Float64,
             jac = -jacobian([x[i], y[j]], p1, p2, p3, p4) # this minus sign here comes from that debuggin experiment in the 2024-10-20 figures spectra... NB
             
             ti,tr = map([x[i], x[j]], p1, p2, p3, p4)
-            action = Sfunction([ti,tr])
-            
-            ### eq. 5 from Emilio's thc paper
-            ps = p_stationary(b, ti, tr)
-            dip_r = dipole_SR_conj(ps .+ A(b)(tr), Ip)
-            fontaine_SR_m0 = 1 / (kappa(Ip) * sqrt(2) * π)
-            traveltime = tr - ti
-            
-            prefactor = (2*π/(im*traveltime))^(3/2) # spreading factor
-            prefactor *= fontaine_SR_m0
-
-            sum = sum + jac * prefactor * dip_r * exp(-im * action) * w[i] * w[j]
+            action = f_vec([ti,tr])
+    
+            sum = sum + jac * prefactor([ti, tr]) * exp(-im * action) * w[i] * w[j]
         end
         
     return sum
@@ -338,10 +338,14 @@ function integrate_quadrilateral(b::Beam, Ip::Float64,
 end
 
 
-function integrate_harmonic_dipole(beam::Beam, Ip::Float64,
-    q::Number,
+function integrate_harmonic_dipole(
+    f::Function,
+    f_grad::Function,
+    # beam::Beam, Ip::Float64,
+    # q::Number,
     timin::Number, timax::Number,
     ttmin::Number, ttmax::Number;
+    prefactor::Function =tvec -> 1*tvec,
     Nflow::Int64=50,
     Δinit::Float64 = 10.,
     gradnthreshold::Float64 = 0.5, # grad normalisation threshold
@@ -363,15 +367,20 @@ function integrate_harmonic_dipole(beam::Beam, Ip::Float64,
 
     for i_flow in 1:Nflow
         nsimplices = length(simplices)
+        # @show simplices
 
-        flow_down!(simplices, points, beam, Ip, q,
+        flow_down!(simplices, points, f, f_grad,
                 threshold = gradnthreshold, δ=flowstepfactor, h_threshold = h_threshold)
+        @show simplices
         subdivide(points, simplices, subdividethreshold)
+        @show simplices
         quads =  [Quadrilateral(points[sim.coord]) for sim in simplices]
         int = complex(zeros(2))
         for quad in quads
-            int += integrate_quadrilateral(beam, Ip, q, quad)
+            int += integrate_quadrilateral(f, quad, prefactor = prefactor)
         end
+
+        @show int
 #         push!(integrals, int[1])
 #         println("int: ", int)
 
@@ -418,3 +427,5 @@ function integrate_harmonic_dipole(beam::Beam, Ip::Float64,
 
     return int,length(simplices)
 end
+
+nothing
