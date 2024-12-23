@@ -9,7 +9,7 @@ using LinearAlgebra
 # using Integrals
 using FiniteDiff
 # using StaticArrays
-# using Contour
+using Contour
 # using Peaks
 # using LinearAlgebra
 # using FastGaussQuadrature
