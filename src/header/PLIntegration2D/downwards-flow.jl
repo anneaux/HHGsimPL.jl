@@ -314,7 +314,7 @@ function integrate_quadrilateral(
     # b::Beam, Ip::Float64,
     #     q::Number,
     quad::Quadrilateral, n::Int64=7;
-    prefactor::Function=tvec->1.
+    prefactor::Function=(ti,tr) -> ones(2)
     )
     
         p1, p2, p3, p4 = quad.points
@@ -330,7 +330,7 @@ function integrate_quadrilateral(
             ti,tr = map([x[i], x[j]], p1, p2, p3, p4)
             action = f_vec([ti,tr])
     
-            sum = sum + jac * prefactor([ti, tr]) * exp(action) * w[i] * w[j]
+            sum = sum + jac * prefactor(ti, tr) * exp(action) * w[i] * w[j]
         end
         
     return sum
@@ -345,7 +345,7 @@ function integrate_harmonic_dipole(
     # q::Number,
     timin::Number, timax::Number,
     ttmin::Number, ttmax::Number;
-    prefactor::Function = tvec -> 1*tvec,
+    prefactor::Function = (ti,tr) -> ones(2),
     Nflow::Int64=50,
     Δinit::Float64 = 10.,
     gradnthreshold::Float64 = 0.5, # grad normalisation threshold
