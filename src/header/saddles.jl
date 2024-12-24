@@ -31,10 +31,8 @@ function solve_SPEqs(q::Number, t0::Vector{T}, b::Beam, Ip::Real,
     try
     ### using NLsolve
         function speqs!(F, x)
-            F[1] = real(speq1(b, Ip, x[1], x[2], x[3], x[4]))
-            F[2] = real(speq2(b, Ip, q, x[1], x[2], x[3], x[4]))
-            F[3] = imag(speq1(b, Ip, x[1], x[2], x[3], x[4]))
-            F[4] = imag(speq2(b, Ip, q, x[1], x[2], x[3], x[4]))
+            F[1:2] .= reim(dS_dti(b,Ip,q,x[1]+x[2]*im,x[3]+x[4]*im))
+            F[3:4] .= reim(dS_dtr(b,Ip,q,x[1]+x[2]*im,x[3]+x[4]*im))
         end
         
         result = nlsolve(speqs!, t0)#, method = :trust_region, factor =fac )#, ftol = 1e-13)#, method = :anderson)
@@ -161,10 +159,6 @@ end;
 
 
 
-
-
-
-
 # I could then somehow include it in a function like this
 #         previous_saddles = saddles_Dict[q]
 #         next_saddles = Vector{Saddle}()
@@ -182,3 +176,4 @@ end;
 #         unique!( s -> round.([s.tr,s.ti], digits= 2), next_saddles)
 #         sort!(next_saddles, by = x -> real(x.ti))
 #         saddles_Dict[q] = next_saddles
+nothing

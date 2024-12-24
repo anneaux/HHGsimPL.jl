@@ -97,3 +97,5 @@ function log_error(file_path::String, error_message::String)
         write(file, error_message * "\n")
     end
 end
+
+nothing

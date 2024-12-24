@@ -187,7 +187,7 @@ function flow_down!(simplices::Vector{Index},points::Vector{Point{T}},
 
     for i1 in 1:length(points)
         if points[i1].active # for the active points
-            step = -δ .* gradN(f_grad, points[i1].x +0im, points[i1].y +0im, threshold)
+            step = -δ .* gradN((ti,tr) -> conj.(complex.(f_grad(ti,tr))), points[i1].x +0im, points[i1].y +0im, threshold)
             points[i1].x += step[1]
             points[i1].y += step[2]
         end
@@ -325,12 +325,12 @@ function integrate_quadrilateral(
         y = x;
         sum = [0. + 0im, 0. + 0im]
         for i=1:n, j=1:n
-            jac = -jacobian([x[i], y[j]], p1, p2, p3, p4) # this minus sign here comes from that debuggin experiment in the 2024-10-20 figures spectra... NB
+            jac = -jacobian([x[i], y[j]], p1, p2, p3, p4) # this minus sign here comes from that debugging experiment in the 2024-10-20 figures spectra... NB
             
             ti,tr = map([x[i], x[j]], p1, p2, p3, p4)
             action = f_vec([ti,tr])
     
-            sum = sum + jac * prefactor([ti, tr]) * exp(-im * action) * w[i] * w[j]
+            sum = sum + jac * prefactor([ti, tr]) * exp(action) * w[i] * w[j]
         end
         
     return sum
@@ -345,7 +345,7 @@ function integrate_harmonic_dipole(
     # q::Number,
     timin::Number, timax::Number,
     ttmin::Number, ttmax::Number;
-    prefactor::Function =tvec -> 1*tvec,
+    prefactor::Function = tvec -> 1*tvec,
     Nflow::Int64=50,
     Δinit::Float64 = 10.,
     gradnthreshold::Float64 = 0.5, # grad normalisation threshold
@@ -371,16 +371,16 @@ function integrate_harmonic_dipole(
 
         flow_down!(simplices, points, f, f_grad,
                 threshold = gradnthreshold, δ=flowstepfactor, h_threshold = h_threshold)
-        @show simplices
+        # @show simplices
         subdivide(points, simplices, subdividethreshold)
-        @show simplices
+        # @show simplices
         quads =  [Quadrilateral(points[sim.coord]) for sim in simplices]
         int = complex(zeros(2))
         for quad in quads
             int += integrate_quadrilateral(f, quad, prefactor = prefactor)
         end
 
-        @show int
+        # @show int
 #         push!(integrals, int[1])
 #         println("int: ", int)
 
@@ -415,8 +415,8 @@ function integrate_harmonic_dipole(
         end
         
         
-        if length(simplices) > maxNsimplices && print_message
-            println("I broke after $i_flow steps because I have more than $maxNsimplices simplices now."); 
+        if length(simplices) > maxNsimplices 
+            print_message ? println("I broke after $i_flow steps because I have more than $maxNsimplices simplices now.") : nothing
             break
         end        
 

@@ -104,13 +104,6 @@ function gradN(
 end;
 
 
-
-
-
-
-
-
-
 ### necklacy things
 function initialise!(necklace::Vector{LineSeg}, points::Vector{Point},
         # f::Function,
@@ -181,7 +174,7 @@ function flow!(necklace::Vector{LineSeg}, points::Vector{Point},
             points[i].active = real(f(points[i].x, points[i].y)) < 0 #(in Job's code that's h-function > thresh, I should clearly state which sign I'm using where etc.) 
 
             if points[i].active
-                step = δ .* gradN(f_grad, points[i].x, points[i].y, threshold)
+                step = δ .* gradN((ti,tr)->conj.(complex.(f_grad(ti,tr))), points[i].x, points[i].y, threshold)
                 points[i].x += step[1]
                 points[i].y += step[2]
             end
@@ -213,7 +206,8 @@ function get_necklace_solver(f::Function,
     initialise!(necklace, points, ti, tr, f_hessian = f_hessian, Ninit = Ninit, ϵ = eigvecfactorinit)
 
     ### find a suitable threshold for the normalisation of the gradient
-    gradient0 = [norm(f_grad(p.x, p.y)) for p in points]
+    # (ti,tr) -> conj.(complex.(f_grad(ti,tr))
+    gradient0 = [norm(conj.(f_grad(p.x, p.y))) for p in points]
     threshold = round(minimum(gradient0), RoundDown, sigdigits=2)
     
     counter = 0
@@ -286,7 +280,7 @@ function get_necklace(f::Function,
         if (real(f(ti, tr))) > -0.2
             return necklace
         else
-            @warn ("Warning (3)! The necklace is smaller than its initialisation")
+            @warn ("Warning (3)! The necklace is smaller than its initialisation, real(f) = $(real(f(ti, tr)))")
             # println("Warning (3)! The necklace is smaller than its initialisation for beam $b at q $q with ti $ti and tr $tr, where h was $(real(-im * S(b, Ip, ti, tr, q)))!")
             # logerrors ? log_error("necklace-errors.txt", "Warning (3) for beam $b at q $q with ti $ti and tr $tr.") : nothing
             return nothing

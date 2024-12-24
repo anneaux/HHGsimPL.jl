@@ -141,6 +141,8 @@ end;
 
 function check_contribution(necklace::Nothing, 
     f::Function,
+    f_grad::Function,
+    f_hessian::Function,
     # b::Beam, Ip::Float64,
     # q::Number,
     ti::ComplexF64, tr::ComplexF64,
@@ -153,7 +155,9 @@ end
 
 
 function check_contribution(
-f::Function,
+    f::Function,
+    f_grad::Function,
+    f_hessian::Function,    
     # b::Beam, Ip::Float64,
 	# q::Number,
 	ti::ComplexF64, tr::ComplexF64,
@@ -163,7 +167,7 @@ f::Function,
     # Ncounter = 600, logerrors::Bool=false)
     
     if real(f(ti, tr)) < 0
-        necklace = get_necklace(f, ti, tr; logerrors=logerrors, kwargs...)
+        necklace = get_necklace(f,f_grad,f_hessian, ti, tr; logerrors=logerrors, kwargs...)
         check_contribution(necklace, f, ti, tr, ti_range, tr_range, Ntimes = Ntimes)
     else 
         @debug "it doesn't contribute! (0)"

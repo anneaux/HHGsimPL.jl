@@ -150,29 +150,32 @@ d2S_dtitr(b::Beam, s::Saddle) = d2Sv_dtitr(b, s.ti, s.tr)
 
 ## Saddle point equations (SPEQs)
 
-
+#### I DON'T THINK I NEED THEM ANYMORE
 # this is actually just S_V_drv(p,ti)
-function speq1(b::Beam, Ip::Float64,
-  tir::Float64, tii::Float64, trr::Float64, tri::Float64
-  )
-  ti = tir + im * tii
-  tr = trr + im * tri
+# function speq1(b::Beam, Ip::Float64,
+#   tir::Float64, tii::Float64, trr::Float64, tri::Float64
+#   )
+#   ti = tir + im * tii
+#   tr = trr + im * tri
   
-  0.5 * scalarproduct2( p_stationary(b, ti, tr) + A(b)(ti) ) .+ Ip
+#   0.5 * scalarproduct2( p_stationary(b, ti, tr) + A(b)(ti) ) .+ Ip
 
-end 
+# end 
 
-speq1(b::Beam, Ip::Float64, ti::ComplexF64, tr::ComplexF64) = speq1(b, Ip, real(ti),imag(ti),real(tr),imag(tr))
+# speq1(b::Beam, Ip::Float64, ti::ComplexF64, tr::ComplexF64) = speq1(b, Ip, real(ti), imag(ti),real(tr), imag(tr))
 
-# this is actually just S_drv = S_V_drv(p,tr) - q*omega
-function speq2(b::Beam, Ip::Float64,
-  q::Number, 
-  tir::Float64, tii::Float64, trr::Float64, tri::Float64
-  )
-  ti = tir + im * tii
-  tr = trr + im * tri  
+# # this is actually just S_drv = S_V_drv(p,tr) - q*omega
+# function speq2(b::Beam, Ip::Float64,
+#   q::Number, 
+#   tir::Float64, tii::Float64, trr::Float64, tri::Float64
+#   )
+#   ti = tir + im * tii
+#   tr = trr + im * tri  
 
-  0.5 * scalarproduct2( p_stationary(b, ti, tr) + A(b)(tr) ) .+ Ip .- q * b.omega1
-end 
+#   0.5 * scalarproduct2( p_stationary(b, ti, tr) + A(b)(tr) ) .+ Ip .- q * b.omega1
+# end 
 
-speq2(b::Beam, Ip::Float64, q::Number, ti::ComplexF64, tr::ComplexF64) = speq2(b, Ip, q, real(ti),imag(ti),real(tr),imag(tr))
+# speq2(b::Beam, Ip::Float64, q::Number, ti::ComplexF64, tr::ComplexF64) = speq2(b, Ip, q, real(ti),imag(ti),real(tr),imag(tr))
+
+
+  nothing

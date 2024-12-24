@@ -19,26 +19,26 @@ function S_for_diff(b::Beam, Ip::Float64,
 end
 
 
-	function my_hessian(b::Beam, Ip::Float64,
-	        q::Number,
-	        ti::ComplexF64, tr::ComplexF64)
+function my_hessian(b::Beam, Ip::Float64,
+        q::Number,
+        ti::ComplexF64, tr::ComplexF64)
 
-	    action(tvec) = real(-S_for_diff(b, Ip, tvec[1]+im*tvec[2], tvec[3]+im*tvec[4], q)) # doesn't matter if I take real or imag there
-	    return FiniteDiff.finite_difference_hessian(action, [reim(ti)..., reim(tr)...])
-	end
+    action(tvec) = real(-S_for_diff(b, Ip, tvec[1]+im*tvec[2], tvec[3]+im*tvec[4], q)) # doesn't matter if I take real or imag there
+    return FiniteDiff.finite_difference_hessian(action, [reim(ti)..., reim(tr)...])
+end
 
 
 
 ### grads and hessians
 
-	function grad(b::Beam, Ip::Float64,
-	    q::Number,
-	    ti::ComplexF64, tr::ComplexF64)
+	# function grad(b::Beam, Ip::Float64,
+	#     q::Number,
+	#     ti::ComplexF64, tr::ComplexF64)
 
-	    g = [dS_dti(b,Ip,q,ti,tr); dS_dtr(b,Ip,q,ti,tr)]
-	    g = conj.(complex.(-1im .* g))
-	    return g
-	end
+	#     g = [dS_dti(b,Ip,q,ti,tr); dS_dtr(b,Ip,q,ti,tr)]
+	#     g = conj.(complex.(-1im .* g))
+	#     return g
+	# end
 
 ########integrate quadrilaterals
 	
