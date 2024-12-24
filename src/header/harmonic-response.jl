@@ -23,7 +23,7 @@ function dipole_SR_conj(k::Vector{ComplexF64}, Ip::Float64)
   return (im *sqrt(2))/  (pi* ka) * k / (scalarproduct2(k) + ka^2 )^2
 end
 
-# ### hessian root ### F*** THIS!!! THIS HAS A BRANCH CUT! see Emilio's RBSFA werid handling of it
+# ### hessian root ### F*** THIS!!! DON'T EVER DARE TO USE THIS AGAIN! IT HAS A BRANCH CUT! see Emilio's RBSFA weird handling of it
 # function hessian_determinant(b::Beam, Ip::Float64, ti::ComplexF64, tr::ComplexF64)
 #   ### ffs I don't know why so far I never had this second term here
 #     return d2S_dtr2(b, Ip, ti, tr) * d2S_dti2(b, Ip, ti, tr) - d2S_dtitr(b, ti, tr) * d2S_dtitr(b, ti, tr)
@@ -33,6 +33,59 @@ end
 #     #d2S_dtr2(b, Ip, s.ti, s.tr) * d2S_dti2(b, Ip, s.ti, s.tr)
 #     return hessian_determinant(b, Ip, s.ti, s.tr) 
 # end
+#
+
+
+
+function hessian_root(h::AbstractArray) 
+    ### I should definitely work this out properly and also make sure this actually gets rid of the branch cuts...
+
+#     h = f_hessian(ti, tr)
+    xd2S_dti2 = -conj(complex(h[1:2,1]...))
+    xd2S_dtr2 = -conj(complex(h[3:4,3]...))
+    xd2S_dtitr = -conj(complex(h[3:4,1]...))
+    
+#         b::Beam, Ip::Float64, ti::ComplexF64, tr::ComplexF64)
+#     (im * 2*π/sqrt(hessian_determinant(b, Ip, s))
+    sqrt1 = sqrt(2π/ (im*xd2S_dti2 ))
+    sqrt2 = sqrt(2π * xd2S_dti2 / (im*(xd2S_dtr2 * xd2S_dti2 - xd2S_dtitr * xd2S_dtitr)) )
+    
+    
+    return sqrt1 * sqrt2
+        
+end
+
+
+
+function saddles_gaussian_contribution(f::Function,
+#     f_grad::Function,
+    f_hessian::Function,
+    ti::ComplexF64, tr::ComplexF64;
+    prefactor::Function = (ti,tr) -> ones(2)
+        )  
+        
+    ### prefactor for the saddle-point method
+    prefactor_spm = hessian_root(f_hessian(ti,tr))
+
+    return prefactor(ti,tr) .* prefactor_spm .* exp(f(ti,tr))
+        
+end 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #### BELOW WANTS TO BE JUSTIFIED WITHIN THE NEW VERSION OF THE CODE FIRST
 

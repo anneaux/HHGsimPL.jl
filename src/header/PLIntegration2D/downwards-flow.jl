@@ -319,7 +319,7 @@ function integrate_quadrilateral(
     
         p1, p2, p3, p4 = quad.points
 
-        f_vec(tvec) = f(tvec[1], tvec[2])
+        # f_vec(tvec) = f(tvec[1], tvec[2])
     
         x, w = gausslegendre(n);
         y = x;
@@ -328,7 +328,8 @@ function integrate_quadrilateral(
             jac = -jacobian([x[i], y[j]], p1, p2, p3, p4) # this minus sign here comes from that debugging experiment in the 2024-10-20 figures spectra... NB
             
             ti,tr = map([x[i], x[j]], p1, p2, p3, p4)
-            action = f_vec([ti,tr])
+            action = f(ti,tr)
+            # f_vec([ti,tr])
     
             sum = sum + jac * prefactor(ti, tr) * exp(action) * w[i] * w[j]
         end
