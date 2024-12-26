@@ -43,7 +43,7 @@
             return nothing
         else
             @warn "I'm hitting the integration plane more than once I think"
-            log_error("new-necklace-hitting-ID-errors.txt", "Warning (2) for beam $(loginfo[1]) at q $(loginfo[2]) with ti $(loginfo[3]) and tr $(loginfo[4]).")
+            # log_error("new-necklace-hitting-ID-errors.txt", "Warning (2) for $(loginfo).")
             return peakindices[1]
         end
     end
@@ -151,12 +151,20 @@ function check_contribution(necklace::Nothing,
     return false
 end
 
+function check_contribution(necklace::Nothing, 
+    f::Function,
+    ti::ComplexF64, tr::ComplexF64,
+    ti_range::Real=50, tr_range::Real=50
+    # ti_cd::ComplexDomain, tr_cd::ComplexDomain
+    ; Ntimes = 100 )
+    return false
+end
 
 
 function check_contribution(
     f::Function,
     f_grad::Function,
-    f_hessian::Function,    
+    f_hessian::Function,
     # b::Beam, Ip::Float64,
 	# q::Number,
 	ti::ComplexF64, tr::ComplexF64,

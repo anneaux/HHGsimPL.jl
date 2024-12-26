@@ -1,6 +1,5 @@
 # ### everything dipole and harmonic field
 
-
 # ########
 
 # function harmonic_field(dipole::Vector{ComplexF64}, ϕ::Float64)
@@ -36,75 +35,7 @@ end
 #
 
 
-
-function hessian_root(h::AbstractArray) 
-    ### I should definitely work this out properly and also make sure this actually gets rid of the branch cuts...
-
-#     h = f_hessian(ti, tr)
-    xd2S_dti2 = -conj(complex(h[1:2,1]...))
-    xd2S_dtr2 = -conj(complex(h[3:4,3]...))
-    xd2S_dtitr = -conj(complex(h[3:4,1]...))
-    
-    # ### RBSFA hessian_root
-    sqrt1 = sqrt(2π/ (im*xd2S_dti2 ))
-    sqrt2 = sqrt(2π * xd2S_dti2 / (im*(xd2S_dtr2 * xd2S_dti2 - xd2S_dtitr * xd2S_dtitr)) )
-    return sqrt1 * sqrt2
-    
-    ### hessian_determinant < = works better for now. But maybe needs to be changed
-    # hdet = xd2S_dtr2 * xd2S_dti2 - xd2S_dtitr * xd2S_dtitr
-    return im * 2*π/sqrt(hdet)
-
-end
-
-
-
-function saddles_gaussian_contribution(f::Function,
-#     f_grad::Function,
-    f_hessian::Function,
-    ti::ComplexF64, tr::ComplexF64;
-    prefactor::Function = (ti,tr) -> ones(2)
-        )  
-        
-    ### prefactor for the saddle-point method
-    prefactor_spm = hessian_root(f_hessian(ti,tr))
-
-    return prefactor(ti,tr) .* prefactor_spm .* exp(f(ti,tr))
-        
-end 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #### BELOW WANTS TO BE JUSTIFIED WITHIN THE NEW VERSION OF THE CODE FIRST
-
-# function hessian_root(b::Beam, Ip::Float64, ti::ComplexF64, tr::ComplexF64)
-# #     (im * 2*π/sqrt(hessian_determinant(b, Ip, s))
-#     sqrt1 = sqrt(2π/ (im*d2S_dti2(b, Ip, ti, tr) ))
-#     sqrt2 = sqrt(2π * d2S_dti2(b, Ip, ti, tr) / (im*(d2S_dtr2(b, Ip, ti, tr) * d2S_dti2(b, Ip, ti, tr) - d2S_dtitr(b, ti, tr) * d2S_dtitr(b, ti, tr))) )
-    
-#     return sqrt1 * sqrt2       
-        
-# end
-
-# function hessian_root(b::Beam, Ip::Float64, s::Saddle)
-#     return hessian_root(b, Ip, s.ti, s.tr)
-# end
-
-
-
 # function dipole(b::Beam, Ip::Float64, s::Saddle) ### new 
  
 #   traveltime = s.tr - s.ti
@@ -125,13 +56,13 @@ end
 # end
 
 
-# function harmonic_intensity(b::Beam, dipX::Complex{Float64}, dipY::Complex{Float64}, q::Number;add_cc::Bool=false)
-#   if add_cc
-#     dipX += conj(dipX)
-#     dipY += conj(dipY)
-#   end
-#   return (abs(dipX)^2 + abs(dipY)^2) * (q*b.omega1)^4/(2*pi*c^3)
-# end
+function harmonic_intensity(b::Beam, dip::Vector{ComplexF64}, q::Number; add_cc::Bool=false)
+  if add_cc
+    dip[1] += conj(dip[1])
+    dip[2] += conj(dip[2])
+  end
+  return (abs(dip[1])^2 + abs(dip[2])^2) * (q*b.omega1)^4/(2*pi*c^3)
+end
 
 
 # function harmonic_intensity(b::Beam, Ip::Float64, s::Saddle ; add_cc::Bool=false)

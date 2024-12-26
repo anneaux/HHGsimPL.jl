@@ -22,8 +22,12 @@ using Contour
 # integrate thimble
 # 
 
+include("necklace-for-SA-thimble.jl")
+include("necklace-for-SD-thimble.jl")
+include("saddles-contributing.jl")
+include("saddle-point-method.jl")
 
-
+include("flow-integration-path-downwards.jl")
 # export get_thimble, integrate_thimble
 
 
