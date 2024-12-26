@@ -3,7 +3,6 @@
 
 
 
-
 ### utils for deciding whether a line crosses a given point
 	function distance_point_to_line(p::AbstractVector, s::AbstractVector, t::AbstractVector)
 	    midpoint = (s .+ t)./2

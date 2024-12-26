@@ -156,6 +156,7 @@ function subdivide!(lineseg::LineSeg,
     end
 end
 
+### flwoing 
 function flow!(necklace::Vector{LineSeg}, points::Vector{Point},
         f::Function,
         f_grad::Function

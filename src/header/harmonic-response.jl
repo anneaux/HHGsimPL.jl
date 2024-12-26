@@ -45,15 +45,15 @@ function hessian_root(h::AbstractArray)
     xd2S_dtr2 = -conj(complex(h[3:4,3]...))
     xd2S_dtitr = -conj(complex(h[3:4,1]...))
     
-    ### RBSFA hessian_root
+    # ### RBSFA hessian_root
     sqrt1 = sqrt(2π/ (im*xd2S_dti2 ))
     sqrt2 = sqrt(2π * xd2S_dti2 / (im*(xd2S_dtr2 * xd2S_dti2 - xd2S_dtitr * xd2S_dtitr)) )
     return sqrt1 * sqrt2
     
     ### hessian_determinant < = works better for now. But maybe needs to be changed
     # hdet = xd2S_dtr2 * xd2S_dti2 - xd2S_dtitr * xd2S_dtitr
-    # return im * 2*π/sqrt(hdet)
-        
+    return im * 2*π/sqrt(hdet)
+
 end
 
 

@@ -339,7 +339,7 @@ function integrate_quadrilateral(
 end
 
 
-function integrate_harmonic_dipole(
+function integrate_flowed_path(
     f::Function,
     f_grad::Function,
     # beam::Beam, Ip::Float64,
@@ -360,7 +360,7 @@ function integrate_harmonic_dipole(
     )
 
     netsimplices = Vector{Int64}()
-    (points, simplices) = initialise_grid(complex(timin),complex(timax),complex(ttmin),complex(ttmax), Δinit)
+    (points, simplices) = initialise_grid(complex(timin), complex(timax), complex(ttmin), complex(ttmax), Δinit)
     overboard = false
     prev_integral = complex(ones(2))
     int = complex(zeros(2))
