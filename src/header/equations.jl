@@ -49,8 +49,6 @@ S(b::Beam, Ip::Float64, s::Saddle) = S(b, Ip, s.ti, s.tr, s.q, s.p)
 ### derivatives of the Volkov action
 function dSv_dtr(b::Beam, Ip::Float64, 
   ti::ComplexF64, tr::ComplexF64) 
-  # inv_tau = 1/(tr - ti)
-  # IA = integral_over_A(ti,tr)
   kr = p_stationary(b, ti, tr) .+ A(b)(tr)
 
   return 0.5 * scalarproduct2(kr) + Ip
@@ -58,8 +56,6 @@ end
 
 function dSv_dti(b::Beam, Ip::Float64, 
   ti::ComplexF64, tr::ComplexF64)
-  # inv_tau = 1/(tr - ti)
-  # IA = integral_over_A(ti,tr)
   ki = p_stationary(b, ti, tr) .+ A(b)(ti)
 
   return  -1 * (0.5 * scalarproduct2(ki) + Ip)
@@ -112,7 +108,7 @@ end
 ### mixed second derivative
 function d2Sv_dtitr(b::Beam, 
   ti::ComplexF64, tr::ComplexF64) 
-  #pfun = -1/(tr-ti) * integral_over_A(ti,tr)
+  #pst = -1/(tr-ti) * integral_over_A(ti,tr)
   inv_tau = 1/(tr - ti)
   integral = IA(b)(ti,tr)
 
@@ -150,7 +146,7 @@ d2S_dtitr(b::Beam, s::Saddle) = d2Sv_dtitr(b, s.ti, s.tr)
 
 #### equations for the necklace
 
-# I guess I could at some point use this for the usual calculation of SV as well
+# I guess I could at some point use this for the usual calculation of S_v as well
 function S_v_for_diff(b::Beam, Ip::Float64, 
   ti::Complex, tr::Complex, 
   p::Vector = p_stationary(b, ti, tr)

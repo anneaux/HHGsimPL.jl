@@ -90,8 +90,6 @@ end
 
 function gradN(
     f_grad::Function,
-    # b::Beam, Ip::Float64,
-    # q::Number,
     ti::ComplexF64, tr::ComplexF64,
     thresh::Float64 = 1.)
 
@@ -106,10 +104,6 @@ end;
 
 ### necklacy things
 function initialise!(necklace::Vector{LineSeg}, points::Vector{Point},
-        # f::Function,
-        # f_drv::Function,
-        # b::Beam, Ip::Float64,
-        # q::Number,
         ti::ComplexF64, tr::ComplexF64;
         f_hessian::Function,
         Ninit::Int64 = 20,
@@ -131,8 +125,8 @@ end
 
 ### TODO this Δ could definitely get a more sophisticated default value
 function subdivide!(lineseg::LineSeg,
-            necklace::Vector{LineSeg}, points::Vector{Point};
-            Δ::Float64=1.)    
+    necklace::Vector{LineSeg}, points::Vector{Point};
+    Δ::Float64=1.)    
 
     p1 = points[lineseg.sindex]
     p2 = points[lineseg.eindex]
@@ -156,13 +150,10 @@ function subdivide!(lineseg::LineSeg,
     end
 end
 
-### flwoing 
+### flowing up
 function flow!(necklace::Vector{LineSeg}, points::Vector{Point},
         f::Function,
-        f_grad::Function
-        # b::Beam, Ip::Float64,
-        # q::Number
-        ;
+        f_grad::Function;
         δ::Float64=0.1,
         threshold::Float64=0.5
         )
@@ -193,13 +184,11 @@ end;
 function get_necklace_solver(f::Function,
     f_grad::Function,
     f_hessian::Function,
-    # b::Beam, Ip::Float64,
-    #     q::Number,
-        ti::ComplexF64, tr::ComplexF64
-        ; Ninit::Int64=20, Ncounter::Int64=600,
-        eigvecfactorinit::Float64 = 0.04, # I should come up with sophisticated guesses here.
-        flowstepfactor::Float64 = 0.4, 
-        subdividethreshold::Float64 = 1.8 )
+    ti::ComplexF64, tr::ComplexF64; 
+    Ninit::Int64=20, Ncounter::Int64=600,
+    eigvecfactorinit::Float64 = 0.04, # I should come up with sophisticated guesses here.
+    flowstepfactor::Float64 = 0.4, 
+    subdividethreshold::Float64 = 1.8 )
        
     necklace = Vector{LineSeg}()
     points = Vector{Point}()
@@ -207,7 +196,6 @@ function get_necklace_solver(f::Function,
     initialise!(necklace, points, ti, tr, f_hessian = f_hessian, Ninit = Ninit, ϵ = eigvecfactorinit)
 
     ### find a suitable threshold for the normalisation of the gradient
-    # (ti,tr) -> conj.(complex.(f_grad(ti,tr))
     gradient0 = [norm(conj.(f_grad(p.x, p.y))) for p in points]
     threshold = round(minimum(gradient0), RoundDown, sigdigits=2)
     
@@ -244,35 +232,14 @@ end;
 function get_necklace(f::Function,
     f_grad::Function,
     f_hessian::Function,
-    # b::Beam, Ip::Float64,
-    #     q::Number,
-        ti::ComplexF64, tr::ComplexF64
-        ; 
-        logerrors::Bool=false,
-        kwargs...
-        )
-        # Ninit::Int64=20, Ncounter::Int64=500,
-        # eigvecfactorinit::Float64 = 0.04, # I should come up with sophisticated guesses here.
-        # flowstepfactor::Float64 = 0.5, 
-        # subdividethreshold::Float64 = 2.,
-        # )
+    ti::ComplexF64, tr::ComplexF64; 
+    logerrors::Bool=false,
+    kwargs... # this passes on all th ekeyword arguments
+    )
     
-    # @show f_hessian(ti, tr)
-
-   necklace = get_necklace_solver(f, f_grad, f_hessian, ti, tr; kwargs...)
-    # Ninit=Ninit, Ncounter=Ncounter,
-    #     eigvecfactorinit = eigvecfactorinit, # I should come up with sophisticated guesses here.
-    #     flowstepfactor = flowstepfactor, 
-    #     subdividethreshold = subdividethreshold )
-    # I think there's a good julian way to pass on the kwargs
-
+    necklace = get_necklace_solver(f, f_grad, f_hessian, ti, tr; kwargs...)
 
     necklace_init = get_necklace_solver(f, f_grad, f_hessian, ti, tr; kwargs..., Ncounter =1)
-        # Ninit = Ninit, Ncounter=1,
-        # eigvecfactorinit = eigvecfactorinit, # I should come up with sophisticated guesses here.
-        # flowstepfactor = flowstepfactor, 
-        # subdividethreshold = subdividethreshold )
-    
     enclosed_area_init = enclosed_area(necklace_init,imag) + enclosed_area(necklace_init,real)
     
     if (enclosed_area(necklace,imag) + enclosed_area(necklace,real)) > enclosed_area_init

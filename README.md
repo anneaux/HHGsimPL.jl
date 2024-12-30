@@ -3,13 +3,4 @@
 [![Build Status](https://github.com/anneaux/HHGsimPL.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/anneaux/HHGsimPL.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Coverage](https://codecov.io/gh/anneaux/HHGsimPL.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/anneaux/HHGsimPL.jl)
 
-
-
-
-### TO DO
-- write documentation
-- use the Electric Fields package to define the laser beams, see respective dev branch
-- implement other methods for find_saddles()
-- implement necklace code --> how to choose flow parameters?
-- consistent code formatting
-- generalise the 'Thc' terminology (folds?)
+Find a small installation help [here](docs/installation.md), as well as a jupyter notebook that showcases the main functionalities for getting HHG dipoles in [the same folder](docs)

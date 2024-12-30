@@ -20,7 +20,6 @@ end
 
 
 function saddles_gaussian_contribution(f::Function,
-#     f_grad::Function,
     f_hessian::Function,
     ti::ComplexF64, tr::ComplexF64;
     prefactor::Function = (ti,tr) -> ones(2)

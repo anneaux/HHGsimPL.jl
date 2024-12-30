@@ -16,13 +16,6 @@ mutable struct Index
 end
 
 
-### subdivision
-# Δx(pp1::Point,pp2::Point) = norm(pp2.x - pp1.x)
-# Δy(pp1::Point,pp2::Point) = norm(pp2.y - pp1.y)
-# toolong(P1::Point, P2::Point, Δ::Vector{Float64}) = (Δx(P1,P2) > Δ[1]) || (Δy(P1,P2) > Δ[2])
-# toolong2(P1::Point, P2::Point, Δ::Vector{Float64}) = norm(point2vec(P1) .- point2vec(P2)) > (sum(Δ)/2)
-
-
 midx(p1::Point,p2::Point) = (p2.x + p1.x)./2
 # midx(ps::Vector{Point{T}}) where T<:Number = sum([p.x for p in ps])/length(ps)
 midy(p1::Point,p2::Point) = (p2.y + p1.y)./2
@@ -178,8 +171,6 @@ end
 function flow_down!(simplices::Vector{Index},points::Vector{Point{T}},
         f::Function,
         f_grad::Function;
-        # b::Beam, Ip::Float64,
-        # q::Number;
         threshold::Float64=0.5, # for normalisation of thr gradient
         δ::Float64=0.5, # flowstepfactor
         h_threshold::Float64=-20.
@@ -232,8 +223,6 @@ end
 function get_simplices(
     f::Function,
     f_grad::Function,
-    # beam::Beam, Ip::Float64,
-    # q::Number,
     timin::Number, timax::Number,
     ttmin::Number, ttmax::Number;
     Nflow::Int64=50,
@@ -311,16 +300,12 @@ end;
 
 function integrate_quadrilateral(
     f::Function,
-    # b::Beam, Ip::Float64,
-    #     q::Number,
     quad::Quadrilateral, n::Int64=7;
     prefactor::Function=(ti,tr) -> ones(2)
     )
     
         p1, p2, p3, p4 = quad.points
 
-        # f_vec(tvec) = f(tvec[1], tvec[2])
-    
         x, w = gausslegendre(n);
         y = x;
         sum = [0. + 0im, 0. + 0im]
@@ -329,7 +314,6 @@ function integrate_quadrilateral(
             
             ti,tr = map([x[i], x[j]], p1, p2, p3, p4)
             action = f(ti,tr)
-            # f_vec([ti,tr])
     
             sum = sum + jac * prefactor(ti, tr) * exp(action) * w[i] * w[j]
         end
@@ -342,8 +326,6 @@ end
 function integrate_flowed_path(
     f::Function,
     f_grad::Function,
-    # beam::Beam, Ip::Float64,
-    # q::Number,
     timin::Number, timax::Number,
     ttmin::Number, ttmax::Number;
     prefactor::Function = (ti,tr) -> ones(2),

@@ -15,7 +15,7 @@ using Contour
 # using FastGaussQuadrature
 
 
-### specify all functions I want to make usable
+### specify all functions I want to make usable ###
 # downwards flow
 # determine if saddle point is relevant (necklace)
 # get thimble

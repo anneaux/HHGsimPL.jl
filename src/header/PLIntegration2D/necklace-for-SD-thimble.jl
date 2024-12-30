@@ -1,8 +1,6 @@
 function initialise_SD!(necklace::Vector{LineSeg}, points::Vector{Point},
         ti::ComplexF64, tr::ComplexF64;
         f_hessian::Function,
-        # b::Beam, Ip::Float64,
-        # q::Number,
         Ninit::Int64 = 20,
         ϵ::Float64 = 0.01)
 
@@ -27,8 +25,6 @@ function adorn_necklace(necklace::Vector{LineSeg}, points::Vector{Point})
 end;
 
 function flow_down!(necklace::Vector{LineSeg}, points::Vector{Point},
-        # b::Beam, Ip::Float64,
-        # q::Number;
         f::Function,
         f_grad::Function;
         δ::Float64=0.1,
@@ -56,16 +52,14 @@ end
 
 ### not sure what I will need this for ever
 function get_necklace_SD_solver_with_traces(
-    # b::Beam, Ip::Float64,
-    #     q::Number,
-        f::Function,
-        f_grad::Function,
-        f_hessian::Function,
-        ti::ComplexF64, tr::ComplexF64
-        ; Ninit::Int64=20, Ncounter::Int64=500,
-        eigvecfactorinit::Float64 = 0.02, # I should come up with sophisticated guesses here.
-        flowstepfactor::Float64 = 0.1, 
-        subdividethreshold::Float64 = 0.5 )
+    f::Function,
+    f_grad::Function,
+    f_hessian::Function,
+    ti::ComplexF64, tr::ComplexF64
+    ; Ninit::Int64=20, Ncounter::Int64=500,
+    eigvecfactorinit::Float64 = 0.02, # I should come up with sophisticated guesses here.
+    flowstepfactor::Float64 = 0.1, 
+    subdividethreshold::Float64 = 0.5 )
     
     necklace = Vector{LineSeg}()
     points = Vector{Point}()    
@@ -124,14 +118,10 @@ end
 
 
 function make_quads(necklace::Vector{LineSeg},
-        points::Vector{Point}, prev_necklace::Vector{LineSeg}
-        # b::Beam, Ip::Float64,
-        # q::Number
-        )
+        points::Vector{Point}, prev_necklace::Vector{LineSeg} )
 
     quads = Vector{Tuple}()
     new_necklace = adorn_necklace(sort_linesegs(necklace), points)  
-#     println("in f: length prev necklace: $(length(prev_necklace)), length new: $(length(new_necklace))")
     for idx in 1:length(prev_necklace)
         quad = (prev_necklace[idx], new_necklace[idx])
         push!(quads, quad)
@@ -142,17 +132,15 @@ end
 
 
 function get_SD_thimble_quadrangles(
-        f::Function,
-        f_grad::Function,
-        f_hessian::Function,
-    # b::Beam, Ip::Float64,
-    #     q::Number,
-        ti::ComplexF64, tr::ComplexF64
-        ; Ninit::Int64=20, Ncounter::Int64=500,
-        accuracy::Float64=1e-4,
-        eigvecfactorinit::Float64 = 0.02, # I should come up with sophisticated guesses here.
-        flowstepfactor::Float64 = 10., 
-        subdividethreshold::Float64 = 2.)
+    f::Function,
+    f_grad::Function,
+    f_hessian::Function,
+    ti::ComplexF64, tr::ComplexF64
+    ; Ninit::Int64=20, Ncounter::Int64=500,
+    accuracy::Float64=1e-4,
+    eigvecfactorinit::Float64 = 0.02, # I should come up with sophisticated guesses here.
+    flowstepfactor::Float64 = 10., 
+    subdividethreshold::Float64 = 2.)
     
     ### check that Ninit ganzzahlig
     necklace = Vector{LineSeg}()
@@ -176,16 +164,7 @@ function get_SD_thimble_quadrangles(
     quadrangles = Vector{Tuple}()
     
     while counter < Ncounter
-        #         println("counter: $counter")
         counter += 1
-            
-        #         for i in 1:length(points)
-        #             if i <= length(points_traces)
-        #                 push!(points_traces[i], deepcopy(points[i]))
-        #             else
-        #                 vcat(points_traces, [deepcopy(points[i])])
-        #             end
-        #         end
         push!(necklaces, deepcopy(adorn_necklace(sort_linesegs(necklace), points)))       
         
         flow_down!(necklace, points, f, f_grad, threshold = threshold, δ = flowstepfactor)
@@ -228,8 +207,6 @@ function integrate_quadrangle(
     p3 = quadrangle[2].e
     p4 = quadrangle[1].e
     
-    # return IntegrateQuad(Sfunction,p1,p2,p3,p4,n)
-
     integrate_quadrilateral(f, Quadrilateral([p1,p2,p3,p4]), n, prefactor=prefactor)
 end
 
@@ -239,8 +216,6 @@ function integrate_SD_thimble(
     f::Function,
     f_grad::Function,
     f_hessian::Function,
-    # b::Beam, Ip::Float64,
-    #     q::Number,
     ti::ComplexF64, tr::ComplexF64;
     prefactor::Function=(ti,tr) -> ones(2),
     Ninit::Int64=20, Ncounter::Int64=500,
@@ -251,9 +226,6 @@ function integrate_SD_thimble(
     
     function integrate_annulus(necklace::Vector{LineSeg},
             points::Vector{Point}, prev_necklace::Vector{LineSeg})
-            # ,
-            # b::Beam, Ip::Float64,
-            # q::Number)
         
         new_necklace = adorn_necklace(sort_linesegs(necklace), points)  
         int = zeros(ComplexF64, 2)

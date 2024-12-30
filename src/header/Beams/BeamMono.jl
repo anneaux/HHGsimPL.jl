@@ -4,7 +4,11 @@ struct BeamMono <: Beam
 	epsilon::Float64
 	phi::Float64
 
-	function BeamMono(;Intensity::Float64, lambda::Int64, epsilon::Float64=0., phi::Float64=0.)
+	function BeamMono(;Intensity::Float64,
+	 lambda::Int64,
+	 epsilon::Float64=0.,
+	 phi::Float64=0.)
+	
 		E0 = sqrt(Intensity/IAU)
 		omega1 = get_omega(lambda)
 		
@@ -13,11 +17,11 @@ struct BeamMono <: Beam
 
 
 	function BeamMono(E0::Float64,
-	omega1::Float64,
-	epsilon::Float64,
-	phi::Float64)
+		omega1::Float64,
+		epsilon::Float64,
+		phi::Float64)
 
-	new(E0,omega1,epsilon,phi)
+		new(E0,omega1,epsilon,phi)
 	end
 
 end
@@ -75,7 +79,7 @@ function S_v_analytic(b::BeamMono, Ip::Float64,
     0.5 * integral  + Ip * (tr - ti)
 end
 
-S_v_analytic(b::BeamMono, Ip::Float64, s::Saddle) = S_v_analytic(b,Ip, s.ti, s.tr, s.p);
+S_v_analytic(b::BeamMono, Ip::Float64, s::Saddle) = S_v_analytic(b, Ip, s.ti, s.tr, s.p);
 
 # function integral_over_E(b::BeamMono,t::Float64)
 # 	res= b.E0/sqrt(1+b.epsilon^2) .*  [-((cos(b.phi)*cos(b.omega1*t))/b.omega1)+(sin(b.phi)*sin(b.omega1*t))/b.omega1 ; -b.epsilon*((cos(b.omega1*t)*sin(b.phi))/b.omega1+(cos(b.phi)*sin(b.omega1*t))/b.omega1)]
