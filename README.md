@@ -13,3 +13,4 @@
 - implement necklace code --> how to choose flow parameters?
 - consistent code formatting
 - generalise the 'Thc' terminology (folds?)
+- stabilising the gradient flow by adding higher order terms

@@ -64,7 +64,7 @@ function check_sp(b::Beam,
     check1 = tt_minimal*TCycle(b) <  real(tt)
 
     # and we only look at positive tunnelling times
-    check2 = imag(ti) > 0 
+    check2 = imag(ti) > 0
     return check1 && check2
 end
 
