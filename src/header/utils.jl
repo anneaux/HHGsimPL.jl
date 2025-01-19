@@ -98,4 +98,19 @@ function log_error(file_path::String, error_message::String)
     end
 end
 
+#############
+
+import Base.in
+function in(x::Real, xmin::Real, xmax::Real; inclusive::Bool=true)
+    if inclusive
+        return xmin <= x <= xmax
+    else
+        return xmin < x < xmax
+    end
+end;
+
+
+
+
+
 nothing
