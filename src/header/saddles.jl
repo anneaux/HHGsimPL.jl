@@ -22,6 +22,7 @@ function /(s::Saddle, TC::Real)
     return Saddle(s.q, s.ti/TC, s.tr/TC, s.p)
 end
 
+traveltime(s::Saddle) = s.tr - s.ti
 
 #########################################################
 
