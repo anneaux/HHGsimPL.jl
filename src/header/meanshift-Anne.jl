@@ -149,7 +149,7 @@ function meanshift(
 end
 
 # I added this because I will mostly deal with 1d data I guess (if not solely)
-function meanshift(x::Vector{T}; maxsamples::Int64=1000) where T <: AbstractFloat
+function meanshift(x::Vector{T}; maxsamples::Int64=2000) where T <: AbstractFloat
   d = size(x,1)
   subset = [1:d;]
   if maxsamples < d
@@ -159,7 +159,7 @@ function meanshift(x::Vector{T}; maxsamples::Int64=1000) where T <: AbstractFloa
 end; # I have no idea if this is what I want but let's see
 
 
-function modedetect(x::Vector{T}; maxsamples::Int64=1000) where T <: AbstractFloat
+function modedetect(x::Vector{T}; maxsamples::Int64=2000) where T <: AbstractFloat
   d = size(x,1)
   subset = [1:d;]
   if maxsamples < d
