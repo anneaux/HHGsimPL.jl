@@ -153,7 +153,7 @@ d2S_dtitr(b::Beam, s::Saddle) = d2Sv_dtitr(b, s.ti, s.tr)
 # I guess I could at some point use this for the usual calculation of SV as well
 function S_v_for_diff(b::Beam, Ip::Float64, 
   ti::Complex, tr::Complex, 
-  p::Vector = p_stationary(b, ti, tr)
+  p::AbstractVector = p_stationary(b, ti, tr)
   )
     domain = (ti,tr)
     prob = IntegralProblem((t,x) -> scalarproduct2( p .+ A(b)(t) ), domain)
@@ -164,7 +164,7 @@ end
 function S_for_diff(b::Beam, Ip::Float64, 
   ti::Complex, tr::Complex, 
   q::Number,
-  p::Vector = p_stationary(b, ti, tr)
+  p::AbstractVector = p_stationary(b, ti, tr)
   )
   
   S_v_for_diff(b, Ip, ti, tr , p) - q* fundamental_frequency(b) * tr
