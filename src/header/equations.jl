@@ -11,7 +11,7 @@ end
 ## Volkov action
 function S_v(b::Beam, Ip::Float64, 
   ti::ComplexF64, tr::ComplexF64, 
-  p::Vector{ComplexF64} = p_stationary(b, ti, tr)
+  p::AbstractVector{ComplexF64} = p_stationary(b, ti, tr)
   )
 
   0.5 * quadgk(t -> scalarproduct2( p .+ A(b)(t) ), ti, tr)[1] + Ip * (tr - ti)
@@ -31,13 +31,13 @@ end
 function S(b::Beam, Ip::Float64, 
   ti::ComplexF64, tr::ComplexF64, 
   q::Number,
-  p::Vector{ComplexF64} = p_stationary(b, ti, tr)
+  p::AbstractVector{ComplexF64} = p_stationary(b, ti, tr)
   )
     
     try
-        S_v_analytic(b, Ip, ti, tr) - q * b.omega1 * tr
+        S_v_analytic(b, Ip, ti, tr) - q * fundamental_frequency(b) * tr
     catch e
-        S_v(b,Ip,ti,tr,p) - q * b.omega1 * tr
+        S_v(b,Ip,ti,tr,p) - q * fundamental_frequency(b) * tr
     end
 end
 
@@ -70,7 +70,7 @@ function dS_dtr(b::Beam, Ip::Float64,
   q::Number, 
   ti::ComplexF64,tr::ComplexF64) 
 
-  return dSv_dtr(b, Ip, ti, tr) - q* b.omega1
+  return dSv_dtr(b, Ip, ti, tr) - q* fundamental_frequency(b)
 end 
  
 function dS_dti(b::Beam, Ip::Float64,
@@ -167,7 +167,7 @@ function S_for_diff(b::Beam, Ip::Float64,
   p::Vector = p_stationary(b, ti, tr)
   )
   
-  S_v_for_diff(b, Ip, ti, tr , p) - q* b.omega1 * tr
+  S_v_for_diff(b, Ip, ti, tr , p) - q* fundamental_frequency(b) * tr
 end
 
 

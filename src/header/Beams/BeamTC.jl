@@ -54,7 +54,8 @@ function BeamBETC(;Intensity1::Real, Intensity2::Real,
 		phi=phi)
 end
 
-TCycle(b::BeamTC) = 2*pi/b.omega1
+fundamental_frequency(b::BeamTC) = b.omega1
+TCycle(b::BeamTC) = 2*pi/fundamental_frequency(b)
 
 
 #### field equations ###########

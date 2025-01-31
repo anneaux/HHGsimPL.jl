@@ -46,7 +46,7 @@ function BeamBEOTC(;Intensity1::Real, Intensity2::Real,
 		phi=phi)
 end
 
-TCycle(b::BeamOTC) = 2*pi/b.omega1
+fundamental_frequency(b::BeamOTC) = b.omega1
 
 #### field equations ###########
 function electric_field(b::BeamOTC)
