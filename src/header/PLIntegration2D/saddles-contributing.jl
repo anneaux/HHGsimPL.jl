@@ -67,12 +67,12 @@ function real_projected_contourlines(
     ti::ComplexF64, tr::ComplexF64,
     # ti_cd::ComplexDomain, tr_cd::ComplexDomain
     ti_range::Real=50, tr_range::Real=50
-    ; Ntimes = 100)    
+    ; Ntimes = 101)    
     
     # TC = TCycle(b)
     tir_values = range(real(ti)- ti_range, stop = real(ti) + ti_range, length = Ntimes)
     # tii_values = range(-1., stop = imag(ti) + 0.25TC, length = Ntimes)
-    trr_values = range(real(tr)- tr_range, stop = real(tr) + tr_range, length = Ntimes)
+    trr_values = range(max(real(tr)- tr_range, real(ti) + ti_range+0.1) , stop = real(tr) + tr_range, length = Ntimes)
     # tri_values = range(-1., stop = imag(ti) + 0.25TC, length = Ntimes)  # this is wrong, because tr can have negative imaginary part! Luckily I don't need that here anyway ;-)
 
     ### level line for the saddle point
