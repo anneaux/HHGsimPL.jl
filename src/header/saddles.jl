@@ -24,6 +24,10 @@ end
 
 traveltime(s::Saddle) = s.tr - s.ti
 
+dist(s1::Saddle, s2::Saddle) = norm([s1.ti - s2.ti, s1.tr - s2.tr]);
+dist(saddles::NTuple{2,Saddle}) = dist(saddles...);
+dist(saddles::Vector{Saddle}) = dist(saddles...);
+
 #########################################################
 
 function solve_SPEqs(q::Number, t0::Vector{T}, b::Beam, Ip::Real,
