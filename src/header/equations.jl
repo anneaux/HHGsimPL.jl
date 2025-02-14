@@ -35,9 +35,9 @@ function S(b::Beam, Ip::Float64,
   )
     
     try
-        S_v_analytic(b, Ip, ti, tr) - q * b.omega1 * tr
+        S_v_analytic(b, Ip, ti, tr) - q * fundamental_frequency(b) * tr
     catch e
-        S_v(b,Ip,ti,tr,p) - q * b.omega1 * tr
+        S_v(b,Ip,ti,tr,p) - q * fundamental_frequency(b) * tr
     end
 end
 
@@ -49,6 +49,8 @@ S(b::Beam, Ip::Float64, s::Saddle) = S(b, Ip, s.ti, s.tr, s.q, s.p)
 ### derivatives of the Volkov action
 function dSv_dtr(b::Beam, Ip::Float64, 
   ti::ComplexF64, tr::ComplexF64) 
+  # inv_tau = 1/(tr - ti)
+  # IA = integral_over_A(ti,tr)
   kr = p_stationary(b, ti, tr) .+ A(b)(tr)
 
   return 0.5 * scalarproduct2(kr) + Ip
@@ -56,6 +58,8 @@ end
 
 function dSv_dti(b::Beam, Ip::Float64, 
   ti::ComplexF64, tr::ComplexF64)
+  # inv_tau = 1/(tr - ti)
+  # IA = integral_over_A(ti,tr)
   ki = p_stationary(b, ti, tr) .+ A(b)(ti)
 
   return  -1 * (0.5 * scalarproduct2(ki) + Ip)
@@ -66,7 +70,7 @@ function dS_dtr(b::Beam, Ip::Float64,
   q::Number, 
   ti::ComplexF64,tr::ComplexF64) 
 
-  return dSv_dtr(b, Ip, ti, tr) - q* b.omega1
+  return dSv_dtr(b, Ip, ti, tr) - q* fundamental_frequency(b)
 end 
  
 function dS_dti(b::Beam, Ip::Float64,
@@ -108,7 +112,7 @@ end
 ### mixed second derivative
 function d2Sv_dtitr(b::Beam, 
   ti::ComplexF64, tr::ComplexF64) 
-  #pst = -1/(tr-ti) * integral_over_A(ti,tr)
+  #pfun = -1/(tr-ti) * integral_over_A(ti,tr)
   inv_tau = 1/(tr - ti)
   integral = IA(b)(ti,tr)
 
@@ -146,7 +150,7 @@ d2S_dtitr(b::Beam, s::Saddle) = d2Sv_dtitr(b, s.ti, s.tr)
 
 #### equations for the necklace
 
-# I guess I could at some point use this for the usual calculation of S_v as well
+# I guess I could at some point use this for the usual calculation of SV as well
 function S_v_for_diff(b::Beam, Ip::Float64, 
   ti::Complex, tr::Complex, 
   p::AbstractVector = p_stationary(b, ti, tr)
@@ -163,7 +167,7 @@ function S_for_diff(b::Beam, Ip::Float64,
   p::AbstractVector = p_stationary(b, ti, tr)
   )
   
-  S_v_for_diff(b, Ip, ti, tr , p) - q* b.omega1 * tr
+  S_v_for_diff(b, Ip, ti, tr , p) - q* fundamental_frequency(b) * tr
 end
 
 

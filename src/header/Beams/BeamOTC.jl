@@ -11,6 +11,7 @@ struct BeamOTC <: Beam
 	phi::Float64
 
 	function BeamOTC(;Intensity1::Real, Intensity2::Real,
+		# omega
 		lambda::Real, 
 		r::Int64, s::Int64,
 		epsilon1::Real, epsilon2::Real,
@@ -45,7 +46,7 @@ function BeamBEOTC(;Intensity1::Real, Intensity2::Real,
 		phi=phi)
 end
 
-TCycle(b::BeamOTC) = 2*pi/b.omega1
+fundamental_frequency(b::BeamOTC) = b.omega1
 
 #### field equations ###########
 function electric_field(b::BeamOTC)
@@ -60,6 +61,10 @@ function electric_field(b::BeamOTC)
 
 	E1(t) = (E01/sqrt(1+epsilon1^2) .* [sin(omega1*t) ; -epsilon1*cos(omega1*t)] )
 	E2(t) = (E02/sqrt(1+epsilon2^2) .* [-epsilon2*cos(omega2*t + phi); sin(omega2*t + phi)] )
+	# E1(t) = (E01/sqrt(1+ϵ1^2) .* [sin(ω1*t) ; -ϵ1*cos(ω1*t)] )
+	# E2(t) = (E02/sqrt(1+ϵ2^2) .* [-ϵ2*cos(ω2*t + ϕ); sin(ω2*t + ϕ)] )
+
+	# E(t) = E1(t) + E2(t)
 
 	E(t) = E1(t) + E2(t)
 

@@ -31,7 +31,7 @@ end
 function solve_SPEqs(q::Number, t0::Vector{T}, b::Beam, Ip::Real,
     roundDigits::Int64=5) where T <: Real
 
-    # try
+    try
     ### using NLsolve
         function speqs!(F, x)
             F[1:2] .= reim(dS_dti(b,Ip,q,x[1]+x[2]*im,x[3]+x[4]*im))
@@ -48,10 +48,10 @@ function solve_SPEqs(q::Number, t0::Vector{T}, b::Beam, Ip::Real,
         else
             return nothing, nothing
         end
-    # catch e
-    #     println("Error in solve_SPEqs(): $e")
-    #     return nothing,nothing
-    # end
+    catch e
+        println("Error in solve_SPEqs(): $e")
+        return nothing,nothing
+    end
 end
 
 

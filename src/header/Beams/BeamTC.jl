@@ -9,6 +9,7 @@ struct BeamTC <: Beam
 	phi::Float64
 
 	function BeamTC(;Intensity1::Real, Intensity2::Real,
+		# omega
 		lambda::Real, 
 		r::Int64, s::Int64,
 		epsilon1::Real, epsilon2::Real,
@@ -53,7 +54,8 @@ function BeamBETC(;Intensity1::Real, Intensity2::Real,
 		phi=phi)
 end
 
-TCycle(b::BeamTC) = 2*pi/b.omega1
+fundamental_frequency(b::BeamTC) = b.omega1
+TCycle(b::BeamTC) = 2*pi/fundamental_frequency(b)
 
 
 #### field equations ###########
@@ -69,8 +71,10 @@ function electric_field(b::BeamTC)
 	epsilon2 = b.epsilon2
 	omega2 = b.omega2 # THIS SHALL NOT BE ZERO!!!! 
 
-	E1(t) = (E01/sqrt(1+epsilon1^2) .* [sin(omega1*t) ; -epsilon1*cos(omega1*t)] )
-	E2(t) = (E02/sqrt(1+epsilon2^2) .* [sin(omega2*t + phi); -epsilon2*cos(omega2*t + phi)] )
+	rotmat = 1 #[0 -1; -1 0]
+
+	E1(t) = rotmat * (E01/sqrt(1+epsilon1^2) .* [sin(omega1*t) ; -epsilon1*cos(omega1*t)] )
+	E2(t) = rotmat * (E02/sqrt(1+epsilon2^2) .* [sin(omega2*t + phi); -epsilon2*cos(omega2*t + phi)] )
 
 	E(t) = E1(t) + E2(t)
 
@@ -88,10 +92,12 @@ function vector_potential(b::BeamTC)
 	epsilon2 = b.epsilon2
 	omega2 = b.omega2 # THIS SHALL NOT BE ZERO!!!! 
 
+	rotmat = 1 #[0 -1; -1 0]
+
 	A01 = E01/omega1/sqrt(1+epsilon1^2) 
 	A02 = E02/omega2/sqrt(1+epsilon2^2)
-	A1(t) = (A01 .* [cos(omega1*t) ; epsilon1 * sin(omega1*t)])
-	A2(t) = (A02 .* [cos(omega2*t + phi); epsilon2 * sin(omega2*t + phi) ])
+	A1(t) = rotmat * (A01 .* [cos(omega1*t) ; epsilon1 * sin(omega1*t)])
+	A2(t) = rotmat * (A02 .* [cos(omega2*t + phi); epsilon2 * sin(omega2*t + phi) ])
 
 	A(t) = A1(t) .+ A2(t)
 
@@ -111,11 +117,13 @@ function integrated_vector_potential(b::BeamTC)
 	epsilon2 = b.epsilon2
 	omega2 = b.omega2 # THIS SHALL NOT BE ZERO!!!! 
 
+	rotmat = 1 #[0 -1; -1 0]
+
 	A01 = E01/omega1/sqrt(1+epsilon1^2) 
 	A02 = E02/omega2/sqrt(1+epsilon2^2)
 
-	integral_over_A1(ti,tr) = (A01 ./ omega1 .* [sin(omega1*tr) - sin(omega1*ti); epsilon1*(-cos(omega1*tr) + cos(omega1 * ti))])
-	integral_over_A2(ti,tr) = (A02 ./ omega2 .* [ sin(omega2*tr + phi) - sin(omega2*ti + phi) ; epsilon2*(-cos(omega2*tr + phi) + cos(omega2*ti + phi))])
+	integral_over_A1(ti,tr) = rotmat * (A01 ./ omega1 .* [sin(omega1*tr) - sin(omega1*ti); epsilon1*(-cos(omega1*tr) + cos(omega1 * ti))])
+	integral_over_A2(ti,tr) = rotmat * (A02 ./ omega2 .* [ sin(omega2*tr + phi) - sin(omega2*ti + phi) ; epsilon2*(-cos(omega2*tr + phi) + cos(omega2*ti + phi))])
 
 	integral_over_A(ti,tr) = integral_over_A1(ti,tr) .+ integral_over_A2(ti,tr)
 
@@ -178,11 +186,13 @@ function integrated_vector_potential_indefinite(b::BeamTC)
 	epsilon2 = b.epsilon2
 	omega2 = b.omega2 # THIS SHALL NOT BE ZERO!!!! 
 
+	rotmat = 1 #[0 -1; -1 0]
+
 	A01 = E01/omega1/sqrt(1+epsilon1^2) 
 	A02 = E02/omega2/sqrt(1+epsilon2^2)
 
-	integral_over_A1(t) = (A01 ./ omega1 .* [sin(omega1*t); epsilon1*(-cos(omega1*t))])
-	integral_over_A2(t) = (A02 ./ omega2 .* [ sin(omega2*t + phi) ; epsilon2*(-cos(omega2*t + phi) )])
+	integral_over_A1(t) = rotmat * (A01 ./ omega1 .* [sin(omega1*t); epsilon1*(-cos(omega1*t))])
+	integral_over_A2(t) = rotmat * (A02 ./ omega2 .* [ sin(omega2*t + phi) ; epsilon2*(-cos(omega2*t + phi) )])
 
 	integral_over_A(t) = integral_over_A1(t) .+ integral_over_A2(t)
 
@@ -219,9 +229,38 @@ IAsq_indefinite(b::BeamTC) = integrated_squared_vector_potential_indefinite(b)
 
 
 
+
+### needs to be reworked for TC beam!!!
+# function electric_field_amplitude_derivative(b::BeamOTC)
+# 	## Beam Characterization from milo2020biell
+# 	phi = b.phi
+# 	epsilon1 = b.epsilon1
+# 	E01 = b.E01
+# 	omega1 = b.omega1
+# 	E02 = b.E02
+# 	epsilon2 = b.epsilon2
+# 	omega2 = b.omega2 # THIS SHALL NOT BE ZERO!!!! 
+
+# 	term1 = 1 + epsilon1^2
+# 	term2 = 1 + epsilon2^2
+
+#    numerator(t) = (-E01 * E02 * sqrt(term1) * sqrt(term2) * (epsilon2 * omega1 + epsilon1 * omega2) * cos(t * omega1) * cos(phi + t * omega2) -
+#    	0.5 * E01^2 * (-term1) * term2 * omega1 * sin(2 * t * omega1) -
+#    	E02 * (E02 * term1 * (-term2) * omega2 * cos(phi + t * omega2) - 
+#    	E01 * sqrt(term1) * sqrt(term2) * (epsilon1 * omega1 + epsilon2 * omega2) * sin(t * omega1))   	* sin(phi + t * omega2))
+
+#    denominator(t) = term1 * term2 * sqrt(((E02 * epsilon2 * cos(phi + t * omega2)) / sqrt(term2) - (E01 * sin(t * omega1)) / 	sqrt(term1))^2 + 
+#    	((E01 * epsilon1 * cos(t * omega1)) / sqrt(term1) - (E02 * sin(phi + t * omega2)) / sqrt(term2))^2)
+
+#     return t -> (numerator(t) / denominator(t))
+# end
+
+
+
 function get_Up(b::BeamTC)
 	A01 = b.E01/b.omega1
 	A02 = b.E02/b.omega2
+	# println("Up = $(A01^2/4 + A02^2/4)")
 	Up = A01^2/4 + A02^2/4
 	return Up
 end

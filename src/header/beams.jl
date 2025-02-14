@@ -1,5 +1,7 @@
 abstract type Beam end
 
+TCycle(b::Beam) = 2*pi/fundamental_frequency(b)
+
 # TC(lambda::Int64) = 2*pi/get_omega(lambda)
 TCycle(;lambda::Real) = lambda / (LAU * c)
 TCycleNU(;lambda::Real) = lambda * 1e-9/cNU
