@@ -76,9 +76,9 @@ end
 ##########################################
 
 
-scalarproduct(a::Vector{}, b::Vector{}) = sum( a .* b )
-scalarproduct(a::Vector{}) = scalarproduct(a,a)
-scalarproduct2(a::Vector{}) = scalarproduct(a,a)
+scalarproduct(a::AbstractVector{}, b::AbstractVector{}) = sum( a .* b )
+scalarproduct(a::AbstractVector{}) = scalarproduct(a,a)
+scalarproduct2(a::AbstractVector{}) = scalarproduct(a,a)
 
 
 

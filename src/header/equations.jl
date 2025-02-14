@@ -11,7 +11,7 @@ end
 ## Volkov action
 function S_v(b::Beam, Ip::Float64, 
   ti::ComplexF64, tr::ComplexF64, 
-  p::Vector{ComplexF64} = p_stationary(b, ti, tr)
+  p::AbstractVector{ComplexF64} = p_stationary(b, ti, tr)
   )
 
   0.5 * quadgk(t -> scalarproduct2( p .+ A(b)(t) ), ti, tr)[1] + Ip * (tr - ti)
@@ -31,7 +31,7 @@ end
 function S(b::Beam, Ip::Float64, 
   ti::ComplexF64, tr::ComplexF64, 
   q::Number,
-  p::Vector{ComplexF64} = p_stationary(b, ti, tr)
+  p::AbstractVector{ComplexF64} = p_stationary(b, ti, tr)
   )
     
     try
@@ -149,7 +149,7 @@ d2S_dtitr(b::Beam, s::Saddle) = d2Sv_dtitr(b, s.ti, s.tr)
 # I guess I could at some point use this for the usual calculation of S_v as well
 function S_v_for_diff(b::Beam, Ip::Float64, 
   ti::Complex, tr::Complex, 
-  p::Vector = p_stationary(b, ti, tr)
+  p::AbstractVector = p_stationary(b, ti, tr)
   )
     domain = (ti,tr)
     prob = IntegralProblem((t,x) -> scalarproduct2( p .+ A(b)(t) ), domain)
@@ -160,7 +160,7 @@ end
 function S_for_diff(b::Beam, Ip::Float64, 
   ti::Complex, tr::Complex, 
   q::Number,
-  p::Vector = p_stationary(b, ti, tr)
+  p::AbstractVector = p_stationary(b, ti, tr)
   )
   
   S_v_for_diff(b, Ip, ti, tr , p) - q* b.omega1 * tr
