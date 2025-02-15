@@ -13,6 +13,15 @@
 	    return distance_point_to_line([p.x,p.y], [l.s.x, l.s.y], [l.e.x, l.e.y])
 	end
 
+	# function find_crossing(line::Vector{LineSeg}, point::Point{T}, tolerance::Float64=0.8) where T<:Real
+	#     mindist, index = findmin([distance_point_to_line(point, seg) for seg in line])
+
+	#     if mindist < tolerance
+	#         return index
+	#     else 
+	#         return nothing
+	#     end
+	# end
 
     function find_crossing(line::Vector{LineSeg}, point::Point{T}, tolerance::Float64=1.;
         loginfo=[]) where T<:Real
@@ -52,14 +61,23 @@
 ### calculating the contour line through a given saddle
 function real_projected_contourlines(
     f::Function,
+
+    # b::Beam, Ip::Float64,
+    # q::Number,
     ti::ComplexF64, tr::ComplexF64,
+    # ti_cd::ComplexDomain, tr_cd::ComplexDomain
     ti_range::Real=50, tr_range::Real=50
-    ; Ntimes = 100)    
+    ; Ntimes = 101)    
     
+    # TC = TCycle(b)
     tir_values = range(real(ti)- ti_range, stop = real(ti) + ti_range, length = Ntimes)
-    trr_values = range(real(tr)- tr_range, stop = real(tr) + tr_range, length = Ntimes)
- 
+    # tii_values = range(-1., stop = imag(ti) + 0.25TC, length = Ntimes)
+    trr_values = range(max(real(tr)- tr_range, real(ti) + ti_range+0.1) , stop = real(tr) + tr_range, length = Ntimes)
+    # tri_values = range(-1., stop = imag(ti) + 0.25TC, length = Ntimes)  # this is wrong, because tr can have negative imaginary part! Luckily I don't need that here anyway ;-)
+
     ### level line for the saddle point
+    # S_values = [-1im*S(b, Ip, complex(tir), complex(trr), q) for tir in tir_values, trr in trr_values]
+    # S_saddle = -1im*S(b, Ip, ti, tr, q)
     S_values = [f(complex(tir), complex(trr)) for tir in tir_values, trr in trr_values]
     S_saddle = f(ti, tr)
     contour_saddle = Contour.contour(tir_values, trr_values, imag.(S_values), imag(S_saddle) )
@@ -67,11 +85,23 @@ function real_projected_contourlines(
     return contour_saddle.lines
 end
 
+### maybe I should revive this at some point
+# function real_projected_contourlines(b::Beam, Ip::Float64,
+#     s::Saddle,
+#     ti_cd::ComplexDomain, tr_cd::ComplexDomain
+#     ; Ntimes = 100) 
+
+#     real_projected_contourlines(b, Ip, s.q, s.ti, s.tr, ti_cd, tr_cd; Ntimes = Ntimes) 
+# end
+
 ### checking if conditions are fulfilled
 function check_contribution(necklace::Vector{LineSeg}, 
     f::Function,
+    # b::Beam, Ip::Float64,
+    # q::Number,
     ti::ComplexF64, tr::ComplexF64,
     ti_range::Real=50, tr_range::Real=50
+    # ti_cd::ComplexDomain, tr_cd::ComplexDomain
     ; Ntimes = 100 )
     
     ### check if necklace hits real plane
@@ -112,7 +142,10 @@ function check_contribution(necklace::Nothing,
     f::Function,
     f_grad::Function,
     f_hessian::Function,
+    # b::Beam, Ip::Float64,
+    # q::Number,
     ti::ComplexF64, tr::ComplexF64,
+    # ti_cd::ComplexDomain, tr_cd::ComplexDomain
     ti_range::Real=50, tr_range::Real=50
     ; Ntimes = 100 )
     return false
@@ -122,6 +155,7 @@ function check_contribution(necklace::Nothing,
     f::Function,
     ti::ComplexF64, tr::ComplexF64,
     ti_range::Real=50, tr_range::Real=50
+    # ti_cd::ComplexDomain, tr_cd::ComplexDomain
     ; Ntimes = 100 )
     return false
 end
@@ -131,9 +165,13 @@ function check_contribution(
     f::Function,
     f_grad::Function,
     f_hessian::Function,
+    # b::Beam, Ip::Float64,
+	# q::Number,
 	ti::ComplexF64, tr::ComplexF64,
     ti_range::Real=50, tr_range::Real=50
+    # ti_cd::ComplexDomain, tr_cd::ComplexDomain
     ; Ntimes::Int64 = 100, logerrors::Bool=false, kwargs...)
+    # Ncounter = 600, logerrors::Bool=false)
     
     if real(f(ti, tr)) < 0
         necklace = get_necklace(f,f_grad,f_hessian, ti, tr; logerrors=logerrors, kwargs...)
