@@ -107,3 +107,29 @@ function in(x::Real, xmin::Real, xmax::Real; inclusive::Bool=true)
         return xmin < x < xmax
     end
 end;
+
+
+function argsmallest(A::AbstractArray{T,N}, n::Integer) where {T,N}
+    ### from here
+    # https://discourse.julialang.org/t/find-n-smallest-values-in-an-n-dims-array/81092/13
+           # should someone ask more elements than array size, just sort array
+       
+           if n>= length(vec(A))
+             ind=collect(1:length(vec(A)))
+             ind=sortperm(A[ind])
+             return CartesianIndices(A)[ind]
+           end
+           # otherwise 
+           ind=collect(1:n)
+           mymax=maximum(A[ind])
+           for j=n+1:length(vec(A))
+           if A[j]<mymax
+            getout=findmax(A[ind])[2]
+            ind[getout]=j
+            mymax=maximum(A[ind])
+           end
+           end
+           ind=ind[sortperm(A[ind])]
+           
+           return CartesianIndices(A)[ind]
+end

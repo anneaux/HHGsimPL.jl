@@ -85,7 +85,6 @@ end
     end
 
 
-
     function get_point(ls::LineSeg, which::Symbol=:s)
         if which==:s
             return Point(ls.s.x, ls.s.y)
