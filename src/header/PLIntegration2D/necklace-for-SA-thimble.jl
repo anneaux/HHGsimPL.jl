@@ -30,6 +30,9 @@
     function norm(ls::LineSeg)
         norm([ls.e.x, ls.e.y] .- [ls.s.x, ls.s.y] )
     end
+    dist(p1::Point, p2::Point) = norm(@SVector[p2.x-p1.x,p2.y-p1.y])
+    import Base.length 
+    length(ls::LineSeg) = dist(ls.e, ls.s)
 
 
     function get_point(ls::LineSeg, which::Symbol=:s)
