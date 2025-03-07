@@ -23,19 +23,42 @@
 	#     end
 	# end
 
-    function find_crossing(line::Vector{LineSeg}, point::Point{T}, tolerance::Float64=1.;
+  
+    function average_distance(line::Vector{LineSeg}, pidx::Int64, threshold::Float64=0.5) # flowstepfactor
+        line_region = [line[pidx]]
+
+        for r in 1:min(10, length(line)-pidx-1)
+            push!(line_region, line[pidx+r])        
+            if norm(line[pidx+r]) > threshold # 2*flowstepfactor
+                break
+            end
+        end   
+        for r in -1:-1:-min(10, pidx-1)
+            push!(line_region, line[pidx+r])
+            if norm(line[pidx+r]) > threshold
+                break
+            end
+        end    
+        
+        av_dist = sum([norm(ls) for ls in line_region])/length(line_region)#nregion
+    #     @show av_dist
+        return av_dist
+    end
+
+
+    function find_crossing(line::Vector{LineSeg}, point::Point{T}, tolerance::Float64=1.; threshold::Float64=0.5,
         loginfo=[]) where T<:Real
 
         distances = [distance_point_to_line(point, seg) for seg in line]
         
-        # finds local minima of the distances, filters for those where the height is <0.8, and returns the respective indices
+        # finds local minima of the distances, filters for those where the height is <tolerance, and returns the respective indices
         # https://docs.juliahub.com/Peaks/3TWUM/0.5.2/
         intersections = findminima(vcat(distances, distances[1:min(20, length(distances))])) |> peakheights(;max = tolerance) |> peakproms(;min = 0.5)
         peakindices =  unique(mod1.(intersections.indices, length(distances)))
 
         ### double-check that peaks are smaller than norm, think: adaptive tolerance for peak height. averaging over norms in that region because otherwise sometimes I'm unlucky
 
-        filter!(pidx -> distances[pidx] < sum([norm(ls) for ls in line[mod1.(collect(pidx-2:pidx+2), length(line))]])/5, peakindices)
+       filter!(pidx -> distances[pidx] < average_distance(line, pidx, threshold), peakindices)
  
         if length(peakindices) == 1
            return peakindices[1]
@@ -49,24 +72,20 @@
     end
 
 
-	function find_crossing(curve::Curve2{Tuple{T, T}}, point::Point{T}, tolerance::Float64=0.8) where T<:Real
-	    line = [LineSeg( Point(curve.vertices[i]...), Point(curve.vertices[i+1]...)) for i in 1:(length(curve.vertices)-1) ]
-	    return find_crossing(line, point, tolerance)
-	end
+    function find_crossing(curve::Curve2{Tuple{T, T}}, point::Point{T}, tolerance::Float64=0.8; threshold::Float64=0.5) where T<:Real
+        line = [LineSeg( Point(curve.vertices[i]...), Point(curve.vertices[i+1]...)) for i in 1:(length(curve.vertices)-1) ]
+        return find_crossing(line, point, tolerance, threshold=threshold)
+    end
 
-	function find_crossing(nocurve::Missing, point::Point{T}, tolerance::Float64=0.8) where T<:Real
-	    return nothing
-	end
+    function find_crossing(nocurve::Missing, point::Point{T}, tolerance::Float64=0.8; threshold::Float64=0.5) where T<:Real
+        return nothing
+    end
 
 ### calculating the contour line through a given saddle
 function real_projected_contourlines(
     f::Function,
-
-    # b::Beam, Ip::Float64,
-    # q::Number,
     ti::ComplexF64, tr::ComplexF64,
-    # ti_cd::ComplexDomain, tr_cd::ComplexDomain
-    ti_range::Real=50, tr_range::Real=50
+    ti_range::Real=30, tr_range::Real=50
     ; Ntimes = 101)    
     
     # TC = TCycle(b)
@@ -85,28 +104,19 @@ function real_projected_contourlines(
     return contour_saddle.lines
 end
 
-### maybe I should revive this at some point
-# function real_projected_contourlines(b::Beam, Ip::Float64,
-#     s::Saddle,
-#     ti_cd::ComplexDomain, tr_cd::ComplexDomain
-#     ; Ntimes = 100) 
-
-#     real_projected_contourlines(b, Ip, s.q, s.ti, s.tr, ti_cd, tr_cd; Ntimes = Ntimes) 
-# end
 
 ### checking if conditions are fulfilled
 function check_contribution(necklace::Vector{LineSeg}, 
     f::Function,
-    # b::Beam, Ip::Float64,
-    # q::Number,
     ti::ComplexF64, tr::ComplexF64,
-    ti_range::Real=50, tr_range::Real=50
-    # ti_cd::ComplexDomain, tr_cd::ComplexDomain
-    ; Ntimes = 100 )
-    
+    ti_range::Real=30, tr_range::Real=50
+    ; Ntimes = 100, kwargs... )
+
+    flowstepfactor = try kwargs[:flowstepfactor] catch e 0.8 end
+
     ### check if necklace hits real plane
     p = Point(0.,0.)
-    idx = find_crossing( imag.(necklace), p) # can add loginfo here
+    idx = find_crossing( imag.(necklace), p, threshold = 2*flowstepfactor) # can add loginfo here
     
     if isnothing(idx)
         @debug "it doesn't contribute! (1)"
@@ -142,12 +152,9 @@ function check_contribution(necklace::Nothing,
     f::Function,
     f_grad::Function,
     f_hessian::Function,
-    # b::Beam, Ip::Float64,
-    # q::Number,
     ti::ComplexF64, tr::ComplexF64,
-    # ti_cd::ComplexDomain, tr_cd::ComplexDomain
-    ti_range::Real=50, tr_range::Real=50
-    ; Ntimes = 100 )
+    ti_range::Real=30, tr_range::Real=50
+    ; Ntimes = 100 , kwargs...)
     return false
 end
 
@@ -155,8 +162,7 @@ function check_contribution(necklace::Nothing,
     f::Function,
     ti::ComplexF64, tr::ComplexF64,
     ti_range::Real=50, tr_range::Real=50
-    # ti_cd::ComplexDomain, tr_cd::ComplexDomain
-    ; Ntimes = 100 )
+    ; Ntimes = 100, kwargs... )
     return false
 end
 
@@ -165,11 +171,8 @@ function check_contribution(
     f::Function,
     f_grad::Function,
     f_hessian::Function,
-    # b::Beam, Ip::Float64,
-	# q::Number,
 	ti::ComplexF64, tr::ComplexF64,
-    ti_range::Real=50, tr_range::Real=50
-    # ti_cd::ComplexDomain, tr_cd::ComplexDomain
+    ti_range::Real=30, tr_range::Real=50
     ; Ntimes::Int64 = 100, logerrors::Bool=false, kwargs...)
     # Ncounter = 600, logerrors::Bool=false)
     
