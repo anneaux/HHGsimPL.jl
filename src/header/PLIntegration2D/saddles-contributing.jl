@@ -84,12 +84,8 @@
 ### calculating the contour line through a given saddle
 function real_projected_contourlines(
     f::Function,
-
-    # b::Beam, Ip::Float64,
-    # q::Number,
     ti::ComplexF64, tr::ComplexF64,
-    # ti_cd::ComplexDomain, tr_cd::ComplexDomain
-    ti_range::Real=50, tr_range::Real=50
+    ti_range::Real=30, tr_range::Real=50
     ; Ntimes = 101)    
     
     # TC = TCycle(b)
@@ -108,23 +104,12 @@ function real_projected_contourlines(
     return contour_saddle.lines
 end
 
-### maybe I should revive this at some point
-# function real_projected_contourlines(b::Beam, Ip::Float64,
-#     s::Saddle,
-#     ti_cd::ComplexDomain, tr_cd::ComplexDomain
-#     ; Ntimes = 100) 
-
-#     real_projected_contourlines(b, Ip, s.q, s.ti, s.tr, ti_cd, tr_cd; Ntimes = Ntimes) 
-# end
 
 ### checking if conditions are fulfilled
 function check_contribution(necklace::Vector{LineSeg}, 
     f::Function,
-    # b::Beam, Ip::Float64,
-    # q::Number,
     ti::ComplexF64, tr::ComplexF64,
-    ti_range::Real=50, tr_range::Real=50
-    # ti_cd::ComplexDomain, tr_cd::ComplexDomain
+    ti_range::Real=30, tr_range::Real=50
     ; Ntimes = 100, kwargs... )
 
     flowstepfactor = try kwargs[:flowstepfactor] catch e 0.8 end
@@ -167,11 +152,8 @@ function check_contribution(necklace::Nothing,
     f::Function,
     f_grad::Function,
     f_hessian::Function,
-    # b::Beam, Ip::Float64,
-    # q::Number,
     ti::ComplexF64, tr::ComplexF64,
-    # ti_cd::ComplexDomain, tr_cd::ComplexDomain
-    ti_range::Real=50, tr_range::Real=50
+    ti_range::Real=30, tr_range::Real=50
     ; Ntimes = 100 , kwargs...)
     return false
 end
@@ -180,7 +162,6 @@ function check_contribution(necklace::Nothing,
     f::Function,
     ti::ComplexF64, tr::ComplexF64,
     ti_range::Real=50, tr_range::Real=50
-    # ti_cd::ComplexDomain, tr_cd::ComplexDomain
     ; Ntimes = 100, kwargs... )
     return false
 end
@@ -190,11 +171,8 @@ function check_contribution(
     f::Function,
     f_grad::Function,
     f_hessian::Function,
-    # b::Beam, Ip::Float64,
-	# q::Number,
 	ti::ComplexF64, tr::ComplexF64,
-    ti_range::Real=50, tr_range::Real=50
-    # ti_cd::ComplexDomain, tr_cd::ComplexDomain
+    ti_range::Real=30, tr_range::Real=50
     ; Ntimes::Int64 = 100, logerrors::Bool=false, kwargs...)
     # Ncounter = 600, logerrors::Bool=false)
     

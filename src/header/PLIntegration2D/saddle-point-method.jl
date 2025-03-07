@@ -13,7 +13,7 @@ function hessian_root(h::AbstractArray)
     
     ### hessian_determinant < = works better for now. But maybe needs to be changed
     # hdet = xd2S_dtr2 * xd2S_dti2 - xd2S_dtitr * xd2S_dtitr
-    return im * 2*π/sqrt(hdet)
+    # return im * 2*π/sqrt(hdet)
 
 end
 

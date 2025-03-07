@@ -276,30 +276,30 @@ function plot_action_contours(beam::Beam,
         trr_values = range(real(str) - rg, stop = real(str) + rg, length=51)
         tri_values = range(imag(str) - rg, stop = imag(str) + rg, length=51)
 
-    #         println("step tri: ", tri_values[2]-tri_values[1])
-        ti = s.ti
+        #         println("step tri: ", tri_values[2]-tri_values[1])
+            ti = s.ti
 
-        S_values = [S(beam, Ip, ti, tr, q) for tr in (trr_values' .+ im*tri_values)]
+            S_values = [S(beam, Ip, ti, tr, q) for tr in (trr_values' .+ im*tri_values)]
 
-        ImS_values, maxi = normalize(imag.(S_values))
-        ReS_values, maxiR = normalize(real.(S_values))
+            ImS_values, maxi = normalize(imag.(S_values))
+            ReS_values, maxiR = normalize(real.(S_values))
 
-        plt2 = Plots.contour(trr_values./TC, tri_values./TC, ImS_values
-            , fill = true, aspectratio = 1, legend = false, levels = 30, linestyle = :solid
-            , xlabel = "real return times / Tcycle" , ylabel = "imag return times / Tcycle", title = "imag(S)")
+            plt2 = Plots.contour(trr_values./TC, tri_values./TC, ImS_values
+                , fill = true, aspectratio = 1, legend = false, levels = 30, linestyle = :solid
+                , xlabel = "real return times / Tcycle" , ylabel = "imag return times / Tcycle", title = "imag(S)")
 
-        Plots.contour!(trr_values./TC, tri_values./TC, ReS_values
-            , fill = false, linestyle = :solid, c= :black, levels = 51)   
+            Plots.contour!(trr_values./TC, tri_values./TC, ReS_values
+                , fill = false, linestyle = :solid, c= :black, levels = 51)   
 
-        S_saddle = (S(beam, Ip, s))
-        con_S_saddle = Contour.contour(trr_values./TC, tri_values./TC, ImS_values', imag.(S_saddle)/maxi)
-    
-        # original integration domain (line)
-        intdomain_tr = Curve2([
-                (real(s.ti)/TC, -0.0),
-                ( max( real(tr_cd.max)./TC, trr_values[end]/TC ) , -0.0)])
-        @show intdomain_tr
-    #         println("S saddle: ", S_saddle)
+            S_saddle = (S(beam, Ip, s))
+            con_S_saddle = Contour.contour(trr_values./TC, tri_values./TC, ImS_values', imag.(S_saddle)/maxi)
+        
+            # original integration domain (line)
+            intdomain_tr = Curve2([
+                    (real(s.ti)/TC, -0.0),
+                    ( max( real(tr_cd.max)./TC, trr_values[end]/TC ) , -0.0)])
+            @show intdomain_tr
+        #         println("S saddle: ", S_saddle)
         con_S_saddle_real = Contour.contour(trr_values./TC, tri_values./TC, real.(S_values'), real.(S_saddle))
         for curve in lines(con_S_saddle_real)
             ip = intersection(curve, intdomain_tr)
