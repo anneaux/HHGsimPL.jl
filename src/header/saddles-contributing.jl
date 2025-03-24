@@ -93,40 +93,39 @@ length(ls::LineSeg) = dist(ls.e, ls.s)
 	end
 
 ### calculating the contour line through a given saddle
-function real_projected_contourlines(b::Beam, Ip::Float64,
-    q::Number,
-    ti::ComplexF64, tr::ComplexF64,
-    ti_cd::ComplexDomain, tr_cd::ComplexDomain
-    ; Ntimes = 100)    
+# function real_projected_contourlines(b::Beam, Ip::Float64,
+#     q::Number,
+#     ti::ComplexF64, tr::ComplexF64,
+#     ti_cd::ComplexDomain, tr_cd::ComplexDomain
+#     ; Ntimes = 100)    
     
-    TC = TCycle(b)
-    tir_values = range(real(ti)- 0.5TC, stop = real(ti) + 0.5TC, length = Ntimes)
-    # tii_values = range(-1., stop = imag(ti) + 0.25TC, length = Ntimes)
-    trr_values = range(real(tr)- 0.5TC, stop = real(tr) + 0.5TC, length = Ntimes)
-    # tri_values = range(-1., stop = imag(ti) + 0.25TC, length = Ntimes)  # this is wrong, because tr can have negative imaginary part! Luckily I don't need that here anyway ;-)
+#     TC = TCycle(b)
+#     tir_values = range(real(ti)- 0.5TC, stop = real(ti) + 0.5TC, length = Ntimes)
+#     # tii_values = range(-1., stop = imag(ti) + 0.25TC, length = Ntimes)
+#     trr_values = range(real(tr)- 0.5TC, stop = real(tr) + 0.5TC, length = Ntimes)
+#     # tri_values = range(-1., stop = imag(ti) + 0.25TC, length = Ntimes)  # this is wrong, because tr can have negative imaginary part! Luckily I don't need that here anyway ;-)
 
-    ### level line for the saddle point
-    S_values = [-1im*S(b, Ip, complex(tir), complex(trr), q) for tir in tir_values, trr in trr_values]
-    S_saddle = -1im*S(b, Ip, ti, tr, q)
-    contour_saddle = Contour.contour(tir_values, trr_values, imag.(S_values), imag(S_saddle) )
+#     ### level line for the saddle point
+#     S_values = [-1im*S(b, Ip, complex(tir), complex(trr), q) for tir in tir_values, trr in trr_values]
+#     S_saddle = -1im*S(b, Ip, ti, tr, q)
+#     contour_saddle = Contour.contour(tir_values, trr_values, imag.(S_values), imag(S_saddle) )
 
-    return contour_saddle.lines
-end
+#     return contour_saddle.lines
+# end
 
-function real_projected_contourlines(b::Beam, Ip::Float64,
-    s::Saddle,
-    ti_cd::ComplexDomain, tr_cd::ComplexDomain
-    ; Ntimes = 100) 
+# function real_projected_contourlines(b::Beam, Ip::Float64,
+#     s::Saddle,
+#     ti_cd::ComplexDomain, tr_cd::ComplexDomain
+#     ; Ntimes = 100) 
 
-    real_projected_contourlines(b, Ip, s.q, s.ti, s.tr, ti_cd, tr_cd; Ntimes = Ntimes) 
-end
+#     real_projected_contourlines(b, Ip, s.q, s.ti, s.tr, ti_cd, tr_cd; Ntimes = Ntimes) 
+# end
 
 ### checking if conditions are fulfilled
 function check_contribution(necklace::Vector{LineSeg}, 
     b::Beam, Ip::Float64,
     q::Number,
-    ti::ComplexF64, tr::ComplexF64,
-    ti_cd::ComplexDomain, tr_cd::ComplexDomain
+    ti::ComplexF64, tr::ComplexF64
     ; Ntimes = 100, kwargs...)
     # flowstepfactor::Float64=0.5 )
     
@@ -148,17 +147,14 @@ function check_contribution(necklace::Vector{LineSeg},
            println("it doesn't contribute! $q (2)") # because this shouldn't happen!
            active = false
         else
-            ### check if the projected contour runs through that point
-            contourlines = real_projected_contourlines(b, Ip, q, ti, tr, ti_cd, tr_cd )
-            
-            crosses = [false]
-            for line in contourlines
-                crossings = find_crossing(line, hitting_point)
-                @debug "crosses at $crossings"
-                push!(crosses, !isnothing(crossings))
+            H_at_hp = imag(-1im*S(b, Ip, necklace[idx].s.x, necklace[idx].s.y, q ))
+            H_at_sp = imag(-1im*S(b, Ip, ti,tr, q))
+            if abs(H_at_hp - H_at_sp) < 1.
+                active = true
+            else
+                println("it doesn't contribute! (4)")
+                active = false
             end
-            active = any(crosses)
-            if !active @debug "it doesn't contribute! (3)" end
         end
     end       
 
@@ -168,8 +164,7 @@ end;
 function check_contribution(necklace::Nothing, 
     b::Beam, Ip::Float64,
     q::Number,
-    ti::ComplexF64, tr::ComplexF64,
-    ti_cd::ComplexDomain, tr_cd::ComplexDomain
+    ti::ComplexF64, tr::ComplexF64
     ; Ntimes = 100, kwargs... )
     return false
 end
@@ -178,14 +173,13 @@ end
 
 function check_contribution(b::Beam, Ip::Float64,
 	q::Number,
-	ti::ComplexF64, tr::ComplexF64,
-    ti_cd::ComplexDomain, tr_cd::ComplexDomain
+	ti::ComplexF64, tr::ComplexF64
     ; Ntimes::Int64 = 100, logerrors::Bool=false, kwargs...)
     # Ncounter = 600, logerrors::Bool=false)
     
     if real(-im * S(b, Ip, ti, tr, q)) < 0
         necklace = get_necklace(b, Ip, q, ti, tr; logerrors=logerrors, kwargs...)
-        check_contribution(necklace, b, Ip, q, ti, tr, ti_cd, tr_cd; Ntimes = Ntimes, kwargs...)
+        check_contribution(necklace, b, Ip, q, ti, tr; Ntimes = Ntimes, kwargs...)
     else 
         @debug "it doesn't contribute! (0)"
         return false
