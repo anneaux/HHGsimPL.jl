@@ -115,9 +115,16 @@ function get_ionisationburst_limits(beam::Beam, Ip::Number, q_values::Vector{T}=
     if haskey(ib_limits_dict, beam)
         return ib_limits_dict[beam]
     else
-        ionisationbursts = get_ionisationbursts(beam, Ip, q_values)
-        lims = [r.limits for r in eachrow(ionisationbursts)]
-        ib_limits_dict[beam] = lims
-        return lims
+        try
+            ionisationbursts = get_ionisationbursts(beam, Ip, q_values)
+            lims = [r.limits for r in eachrow(ionisationbursts)]
+            ib_limits_dict[beam] = lims
+            return lims
+        catch e
+            println("Error in get_ionisationburst_limits(): ", e)
+            lims = [(0., 0.5),(0.5, 1.0)]
+            ib_limits_dict[beam] = lims
+            return lims
+        end
     end
 end
