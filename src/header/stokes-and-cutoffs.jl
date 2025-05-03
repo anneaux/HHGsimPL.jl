@@ -37,7 +37,6 @@ function thceq2(b::Beam, Ip::Float64,
   return dSv_dti(b, Ip, ti,tr)
 end
 
-
 ### cutoff energy 
 function E_hc(b::Beam, Ip::Float64,
   tihc::ComplexF64,trhc::ComplexF64)

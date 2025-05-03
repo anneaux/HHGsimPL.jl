@@ -62,7 +62,7 @@ function *(cd1::ComplexDomain, z::Real) # this function multiplies the whole dom
     return ComplexDomain(rmin,rmax,imin,imax)
 end;
 
-function in(z::Complex,cd::ComplexDomain)
+function in(z::Complex, cd::ComplexDomain)
     return (real(cd.min) <= real(z) < real(cd.max) ) && (imag(cd.min) <= imag(z) < imag(cd.max) )
 end;
 
@@ -108,28 +108,32 @@ function in(x::Real, xmin::Real, xmax::Real; inclusive::Bool=true)
     end
 end;
 
+function in(x::Complex, xmin::Complex, xmax::Complex; inclusive::Bool=true)
+    return in(real(x), real(xmin), real(xmax), inclusive=inclusive) && in(imag(x), imag(xmin), imag(xmax), inclusive=inclusive)
+end;
+
 
 function argsmallest(A::AbstractArray{T,N}, n::Integer) where {T,N}
     ### from here
     # https://discourse.julialang.org/t/find-n-smallest-values-in-an-n-dims-array/81092/13
            # should someone ask more elements than array size, just sort array
        
-           if n>= length(vec(A))
-             ind=collect(1:length(vec(A)))
-             ind=sortperm(A[ind])
-             return CartesianIndices(A)[ind]
-           end
-           # otherwise 
-           ind=collect(1:n)
-           mymax=maximum(A[ind])
-           for j=n+1:length(vec(A))
-           if A[j]<mymax
-            getout=findmax(A[ind])[2]
-            ind[getout]=j
-            mymax=maximum(A[ind])
-           end
-           end
-           ind=ind[sortperm(A[ind])]
-           
-           return CartesianIndices(A)[ind]
+   if n>= length(vec(A))
+     ind=collect(1:length(vec(A)))
+     ind=sortperm(A[ind])
+     return CartesianIndices(A)[ind]
+   end
+   # otherwise 
+   ind=collect(1:n)
+   mymax=maximum(A[ind])
+   for j=n+1:length(vec(A))
+   if A[j]<mymax
+    getout=findmax(A[ind])[2]
+    ind[getout]=j
+    mymax=maximum(A[ind])
+   end
+   end
+   ind=ind[sortperm(A[ind])]
+   
+   return CartesianIndices(A)[ind]
 end
