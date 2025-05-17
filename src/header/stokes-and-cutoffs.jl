@@ -48,7 +48,7 @@ E_hc(b::Beam, Ip::Float64, thc::Thc) = E_hc(b,Ip,thc,tihc,thc.trhc)
 ### harmonic order 
 function thc_qc(b::Beam, Ip::Float64,
   tihc::ComplexF64,trhc::ComplexF64)
-  return E_hc(b,Ip,tihc,trhc)/b.omega1
+  return E_hc(b,Ip,tihc,trhc)/fundamental_frequency(b)
 end
 thc_qc(b::Beam, Ip::Float64, thc::Thc) = thc_qc(b, Ip, thc.tihc, thc.trhc)
 
