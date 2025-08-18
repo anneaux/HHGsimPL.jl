@@ -144,12 +144,12 @@ function subdivide(points::Vector{Point{T}}, simplices::Vector{Index}, Δ::Float
 end
 
 
-function initialise_grid(timin::ComplexF64, timax::ComplexF64, ttmin::ComplexF64, ttmax::ComplexF64, Δ::Float64)
+function initialise_grid(t1min::ComplexF64, t1max::ComplexF64, t2min::ComplexF64, t2max::ComplexF64, Δ::Float64)
     points = [
-        Point(timin, timin+ttmin), 
-        Point(timin, timin+ttmax), 
-        Point(timax, timax+ttmax),
-        Point(timax, timax+ttmin)]    
+        Point(t1min, t2min), 
+        Point(t1min, t2max), 
+        Point(t1max, t2max),
+        Point(t1max, t2min)]    
     simplices = [Index([1,2,3,4])]
     
     ###     subdivide_2(points, simplices, Δ) # instead of calling this I'll do it here directly
@@ -223,8 +223,8 @@ end
 function get_simplices(
     f::Function,
     f_grad::Function,
-    timin::Number, timax::Number,
-    ttmin::Number, ttmax::Number;
+    t1min::Number, t1max::Number,
+    t2min::Number, t2max::Number;
     Nflow::Int64=50,
     Δinit::Float64 = 10.,
     gradnthreshold::Float64 = 0.5, # grad normalisation threshold
@@ -236,7 +236,7 @@ function get_simplices(
     )
 
     netsimplices = Vector{Int64}()
-    (points, simplices) = initialise_grid(complex(timin),complex(timax),complex(ttmin),complex(ttmax), Δinit)
+    (points, simplices) = initialise_grid(complex(t1min),complex(t1max),complex(t2min),complex(t2max), Δinit)
     overboard = false
     push!(netsimplices, length(simplices))
     for i_flow in 1:Nflow

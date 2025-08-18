@@ -107,13 +107,16 @@ end;
 
 ### necklacy things
 function initialise!(necklace::Vector{LineSeg}, points::Vector{Point},
-        ti::ComplexF64, tr::ComplexF64;
-        f_hessian::Function,
+        ti::ComplexF64, tr::ComplexF64,
+        f::Function;
         Ninit::Int64 = 20,
         ϵ::Float64 = 0.01)
 
-    hessian = f_hessian(ti, tr) #my_hessian(b,Ip,q,ti,tr)
-
+    hessian = FiniteDiff.finite_difference_hessian(
+        tvec -> imag(f(complex(tvec[1:2]...), complex(tvec[3:4]...))), 
+        [reim(ti)..., reim(tr)...])
+    # f_hessian(ti, tr) #my_hessian(b,Ip,q,ti,tr)
+# 
     # this could certainly be made more julian    
     eigenvectors = [[complex(vec[1:2]...), complex(vec[3:4]...)] for vec in eachcol(eigvecs(hessian))]
 
@@ -196,7 +199,7 @@ function get_necklace_solver(f::Function,
     necklace = Vector{LineSeg}()
     points = Vector{Point}()
 
-    initialise!(necklace, points, ti, tr, f_hessian = f_hessian, Ninit = Ninit, ϵ = eigvecfactorinit)
+    initialise!(necklace, points, ti, tr, f, Ninit = Ninit, ϵ = eigvecfactorinit)
 
     ### find a suitable threshold for the normalisation of the gradient
     gradient0 = [norm(conj.(f_grad(p.x, p.y))) for p in points]

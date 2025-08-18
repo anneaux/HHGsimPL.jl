@@ -79,7 +79,8 @@ end
 scalarproduct(a::AbstractVector{}, b::AbstractVector{}) = sum( a .* b )
 scalarproduct(a::AbstractVector{}) = scalarproduct(a,a)
 scalarproduct2(a::AbstractVector{}) = scalarproduct(a,a)
-
+scalarproduct(a::Number, b::Number) = a .* b;
+scalarproduct2(a::Number) = scalarproduct(a,a);
 
 
 #####################
