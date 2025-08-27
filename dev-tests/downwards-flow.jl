@@ -85,7 +85,25 @@ function subdivide_simplices!(points::Vector{Point{T}}, simplices::Vector{Index}
 
                     new1 = midpoint(simplex[keys[max1_idx]]...) # new point 1
                     new2 = midpoint(simplex[keys[max2_idx]]...) # new point 2
-                    append!(points, [new1, new2]) #############
+
+                    already_created_1 = findall(p->isequal(p, new1), points)
+                    already_created_2 = findall(p->isequal(p, new2), points)
+
+                    if isempty(already_created_1)
+                        push!(points, new1)
+                        new1_idx = l+1
+                    else
+                        new1_idx = already_created_1[1]
+                    end
+                    
+                    if isempty(already_created_2)
+                        push!(points, new2)
+                        new2_idx = l+1+ isempty(already_created_1)
+                    else
+                        new2_idx = already_created_2[1]
+                    end
+
+
                     simplices[i3].active = false #############
 
                     push!(keys, [keys[max1_idx][1],5],[5,keys[max1_idx][2]] )
@@ -124,7 +142,7 @@ function subdivide_simplices!(points::Vector{Point{T}}, simplices::Vector{Index}
                     new_sim2 = simplex[new_sim2_idx]
                     
                     ### now translate back to the actual indices
-                    proper_indices = [v1,v2,v3,v4, l+1, l+2]
+                    proper_indices = [v1,v2,v3,v4, new1_idx, new2_idx]
                     append!(simplices, [
                         Index(proper_indices[new_sim1_idx]),
                         Index(proper_indices[new_sim2_idx])])
@@ -307,10 +325,12 @@ end;
 
 function integrate_quadrilateral(b::Beam, Ip::Float64,
         q::Number,
-        quad::Quadrilateral, n::Int64=7)
+        quad::Quadrilateral;
+        n::Int64=7,
+        scaling_ν::Float64=1.)
     
         p1, p2, p3, p4 = quad.points
-        Sfunction(tvec) = S(b, Ip, tvec[1], tvec[2], q)
+        Sfunction(tvec) = scaling_ν * S(b, Ip, tvec[1], tvec[2], q)
     
         x, w = gausslegendre(n);
         y = x;
@@ -351,7 +371,8 @@ function integrate_harmonic_dipole(beam::Beam, Ip::Float64,
     maxNsimplices::Int64=5000,
     integral_accuracy::Float64=1e-7,
     integral_rel_error::Float64=0.05,
-    print_message::Bool=true
+    print_message::Bool=true, 
+    scaling_ν::Float64=1. # scaling factor "large parameter" for the integration
     )
 
     netsimplices = Vector{Int64}()
@@ -370,10 +391,10 @@ function integrate_harmonic_dipole(beam::Beam, Ip::Float64,
         quads =  [Quadrilateral(points[sim.coord]) for sim in simplices]
         int = complex(zeros(2))
         for quad in quads
-            int += integrate_quadrilateral(beam, Ip, q, quad)
+            int += integrate_quadrilateral(beam, Ip, q, quad, scaling_ν=scaling_ν)
         end
-#         push!(integrals, int[1])
-#         println("int: ", int)
+    #         push!(integrals, int[1])
+    #         println("int: ", int)
 
         abs_diff = norm(int .- prev_integral) 
         if 0 < abs_diff < integral_accuracy # if I don't want to stop here I can just set the goal incredibly low
@@ -393,10 +414,10 @@ function integrate_harmonic_dipole(beam::Beam, Ip::Float64,
 
         prev_integral = int
 
-#         if has_converged(netsimplices[2:end], tol = 0.05*netsimplices[1]) 
-#             println("The number of simplices converged at i_flow = $i_flow."); 
-#             break 
-#         end
+    #         if has_converged(netsimplices[2:end], tol = 0.05*netsimplices[1]) 
+    #             println("The number of simplices converged at i_flow = $i_flow."); 
+    #             break 
+    #         end
 
 
         
@@ -406,15 +427,56 @@ function integrate_harmonic_dipole(beam::Beam, Ip::Float64,
         end
         
         
-        if length(simplices) > maxNsimplices && print_message
+        if length(simplices) > maxNsimplices
             println("I broke after $i_flow steps because I have more than $maxNsimplices simplices now."); 
             break
         end        
 
-        if i_flow == Nflow && print_message
+        if i_flow == Nflow
             println("I stopped because I reached the maximum flow steps, i.e. $Nflow, with $(length(simplices)) simplices.")            
         end
     end
 
-    return int,length(simplices)
+    return int, length(simplices)
+end
+
+function integrate_harmonic_dipole_fixed_N(beam::Beam, Ip::Float64,
+    q::Number,
+    timin::Number, timax::Number,
+    ttmin::Number, ttmax::Number;
+    Nflow::Int64=50,
+    Δinit::Float64 = 10.,
+    gradnthreshold::Float64 = 0.5, # grad normalisation threshold
+    flowstepfactor::Float64 = 2., # flowstepfactor
+    subdividethreshold::Float64 = 8., # subdivide threshold, wants to be 4 * δ
+    h_threshold::Float64 = -150.,
+#     maxNsimplices::Int64=5000,
+#     integral_accuracy::Float64=1e-7,
+#     integral_rel_error::Float64=0.05,
+    print_message::Bool=true, 
+    scaling_ν::Float64=1. # scaling factor "large parameter" for the integration
+    )
+
+    netsimplices = Vector{Int64}()
+    (points, simplices) = initialise_grid(complex(timin),complex(timax),complex(ttmin),complex(ttmax), Δinit)
+    overboard = false
+#     prev_integral = complex(ones(2))
+    int = complex(zeros(2))
+
+
+    for i_flow in 1:Nflow
+        # nsimplices = length(simplices)
+
+        flow_down!(simplices, points, beam, Ip, q,
+                threshold = gradnthreshold, δ=flowstepfactor, h_threshold = h_threshold)
+        subdivide(points, simplices, subdividethreshold)
+        quads =  [Quadrilateral(points[sim.coord]) for sim in simplices]
+        int = complex(zeros(2))
+        for quad in quads
+            int += integrate_quadrilateral(beam, Ip, q, quad, scaling_ν=scaling_ν)
+        end
+#         prev_integral = int
+    end
+
+    return int, length(simplices)
 end
