@@ -46,15 +46,15 @@ function maxdist(idx::Int64, simplices::Vector{Index}, points::Vector{Point{T}})
     return maxdist([p1,p2,p3,p4])
 end
 
-function subdivide_simplices!(points::Vector{Point{T}}, simplices::Vector{Index}, Δ::Float64) where T<:Number
-   
+function subdivide_simplices!(points::Vector{Point{T}}, simplices::Vector{Index}, Δ::Float64, init::Bool=false) where T<:Number
+   ### CAREFUL - THIS WILL CREATE POINTS TWICE. I SHALL UPDATE THIS WITH THE IMPLEMENTATION FROM THE MASTER BRANCH!!!!
     for i3 in eachindex(simplices)
         sim = simplices[i3]
         if sim.active
             v1, v2, v3, v4 = sim.coord[1], sim.coord[2], sim.coord[3], sim.coord[4] # indices
             p1, p2, p3, p4 = points[v1], points[v2], points[v3], points[v4]
 
-            if p1.active && p2.active && p3.active && p4.active # == allpointsactive
+            if (p1.active && p2.active && p3.active && p4.active) || init # == allpointsactive
                 l = length(points)
 
                 d12 = norm([p1.x-p2.x, p1.y-p2.y])
@@ -144,12 +144,16 @@ function subdivide(points::Vector{Point{T}}, simplices::Vector{Index}, Δ::Float
 end
 
 
-function initialise_grid(t1min::ComplexF64, t1max::ComplexF64, t2min::ComplexF64, t2max::ComplexF64, Δ::Float64)
+function initialise_grid(t1min::ComplexF64, t1max::ComplexF64,
+ t2min::ComplexF64, t2max::ComplexF64,
+ Δ::Float64, flow_bounds=[true, true, true, true])
     points = [
-        Point(t1min, t2min), 
-        Point(t1min, t2max), 
-        Point(t1max, t2max),
-        Point(t1max, t2min)]    
+        Point(t1min, t2min, flow_bounds[1]), 
+        Point(t1min, t2max, flow_bounds[2]), 
+        Point(t1max, t2max, flow_bounds[3]),
+        Point(t1max, t2min, flow_bounds[4])]  
+
+
     simplices = [Index([1,2,3,4])]
     
     ###     subdivide_2(points, simplices, Δ) # instead of calling this I'll do it here directly
@@ -158,7 +162,7 @@ function initialise_grid(t1min::ComplexF64, t1max::ComplexF64, t2min::ComplexF64
     
     while (n_old != n_new)
         n_old = n_new
-        subdivide_simplices!(points, simplices, Δ)
+        subdivide_simplices!(points, simplices, Δ, n_new == 0)
         filter!(sim->sim.active, simplices)
         n_new = length(simplices)
     end    
@@ -232,11 +236,12 @@ function get_simplices(
     subdividethreshold::Float64 = 8., # subdivide threshold, wants to be 4 * δ
     h_threshold::Float64 = -150.,
     maxNsimplices::Int64=5000,
-    tolNsimplices::Float64=0.05
+    tolNsimplices::Float64=0.05,
+    flow_bounds::Vector{Bool}=[true,true,true,true]
     )
 
     netsimplices = Vector{Int64}()
-    (points, simplices) = initialise_grid(complex(t1min),complex(t1max),complex(t2min),complex(t2max), Δinit)
+    (points, simplices) = initialise_grid(complex(t1min),complex(t1max),complex(t2min),complex(t2max), Δinit, flow_bounds)
     overboard = false
     push!(netsimplices, length(simplices))
     for i_flow in 1:Nflow
