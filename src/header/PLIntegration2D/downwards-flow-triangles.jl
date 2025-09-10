@@ -186,9 +186,6 @@ end
 
 
 
-
-
-
 #### DOWNWARDS FLOW
 
 
@@ -295,15 +292,21 @@ function flow_down!(triangles, points::Vector{PointA{T}},
             step = -δ .* gradN((ti,tr) -> conj.(complex.(f_grad(ti,tr))), points[i1].x +0im, points[i1].y +0im, threshold)
             points[i1].x += step[1]
             points[i1].y += step[2]
+
+            ### turning them inactive when they are below the threshold. Doing this here prevents lonely relict points from flowing if their triangle has turned inactive already.
+            if real(f(xy(points[i1])...)) < h_threshold 
+                points[i1].active = false
+            end
         end
     end
 
     for i2 in eachindex(triangles)
         if triangles[i2].active
             for v in triangles[i2].coord
-                if real(f(points[v].x, points[v].y)) < h_threshold 
+                if !points[v].active
+                # if real(f(points[v].x, points[v].y)) < h_threshold 
                     triangles[i2].active = false # am I sure that I want to turn the whole simplex inactive?
-                    points[v].active = false
+                    # points[v].active = false
                 end
             end
         end
