@@ -170,7 +170,7 @@ function S_for_diff(b::Beam, Ip::Float64,
   S_v_for_diff(b, Ip, ti, tr , p) - q* fundamental_frequency(b) * tr
 end
 
-
+#### I need this for the necklace
 function my_hessian(b::Beam, Ip::Float64,
   q::Number,
   ti::ComplexF64, tr::ComplexF64)

@@ -14,6 +14,8 @@ mutable struct PointA{T}
 end
 PointA(x,y) = PointA(x,y,true);
 
+xy(p::PointA) = (p.x, p.y);
+
 dist(p1::PointA, p2::PointA) = norm([p1.x-p2.x, p1.y-p2.y])
 
 import Base.isequal
