@@ -38,28 +38,28 @@ mutable struct TriangleA
 end
 
 function project_onto_triangle(base::AbstractVector, points::AbstractVector) # what are these types?
-	    @assert length(base) == 3 "Need exactly 3 vertices"
+    @assert length(base) == 3 "Need exactly 3 vertices"
 
-	    # Convert to R^4
-	    vs = [toR4(z.x, z.y) for z in base]
+    # Convert to R^4
+    vs = [toR4(z.x, z.y) for z in base]
 
-	    # Basepoint
-	    v1, v2, v3 = vs
-	    e1 = v2 - v1
-	    e2 = v3 - v1
+    # Basepoint
+    v1, v2, v3 = vs
+    e1 = v2 - v1
+    e2 = v3 - v1
 
-	    # Gram-Schmidt to find orthonormal basis
-	    u1 = e1 / norm(e1)
-	    e2_proj = e2 - (u1 ⋅ e2) * u1
-	    u2 = e2_proj / norm(e2_proj)
+    # Gram-Schmidt to find orthonormal basis
+    u1 = e1 / norm(e1)
+    e2_proj = e2 - (u1 ⋅ e2) * u1
+    u2 = e2_proj / norm(e2_proj)
 
-	    # Projection function
-	    proj(v) = [(u1 ⋅ (v - v1)), (u2 ⋅ (v - v1))]
+    # Projection function
+    proj(v) = [(u1 ⋅ (v - v1)), (u2 ⋅ (v - v1))]
 
-	    # Project all points
-	    ps = [proj(toR4(p.x, p.y)) for p in points]
+    # Project all points
+    ps = [proj(toR4(p.x, p.y)) for p in points]
 
-	    return ps
+    return ps
 end
 
 using MiniQhull
@@ -273,7 +273,7 @@ function initialise_triangles_on_real_plane(xmin, xmax, ymin, ymax, Δx, Δy)
 
 	### filter out degenerate points!
 
-
+    #### THIS REQUIRES FURTHER DEVELOPMENT
 
     return points_ini, connections
 end
