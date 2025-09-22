@@ -19,7 +19,7 @@ xy(p::PointA) = (p.x, p.y);
 dist(p1::PointA, p2::PointA) = norm([p1.x-p2.x, p1.y-p2.y])
 
 import Base.isequal
-isequal(p1::PointA,p2::PointA) = isequal(p1.x,p2.x) && isequal(p1.y,p2.y)
+isequal(p1::PointA, p2::PointA) = isequal(p1.x,p2.x) && isequal(p1.y,p2.y)
 Base.hash(p::PointA, h::UInt) = hash([p.x,p.y], h)
 
 function float2complex(p::PointA)
@@ -84,7 +84,7 @@ function subdivide_triangle_new!(points, t_vertices::TriangleA; Δ::Real=0.5, de
 	            new_points = [PointA(c...) for c in zip(xvals[2:end-1], yvals[2:end-1])] # I don't want to include the actual points themselves
 
 	            for np in new_points
-	                already_created = findall(p->isequal(p, np), points) 
+	                already_created = findall(p->isequal(round.(xy(p),digits=8), round.(xy(np),digits=8)), points) 
 	                if isempty(already_created)
 	                    push!(points, np)
 	                    push!(vertices_here, length(points))
@@ -322,7 +322,7 @@ function subdivide_triangles!(points, triangles, subdividethreshold)
     while (n_old != n_new)
         n_old = n_new 
         i_while += 1
-        i = 1
+        # i = 1
 
         ### in subdivide sub routine ideally
         for i_t in eachindex(triangles)
@@ -337,7 +337,7 @@ function subdivide_triangles!(points, triangles, subdividethreshold)
                     end
                 elseif !any([p.active for p in points[triangle.coord]])
                     triangle.active = false
-                    println("here i have turnt a triangle inactive")
+                    # println("here i have turnt a triangle inactive")
                 end
             end
         end
