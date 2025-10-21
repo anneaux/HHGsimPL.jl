@@ -44,23 +44,46 @@ function hessian_root(b::Beam, Ip::Float64, s::Saddle)
 end
 
 
+
+##########
+function hhg_prefactor(b::Beam, Ip::Number, ti::ComplexF64,tr::ComplexF64)
+    ### eq. 5 from Emilio's thc paper
+    traveltime = tr - ti
+    ps = p_stationary(b, ti, tr)
+
+    dip_r = dipole_SR_conj(ps .+ A(b)(tr), Ip)
+
+    fontaine_SR_m0 = 1 / (kappa(Ip) * sqrt(2) * π)
+
+    prefactor_const = (2*π/(im*traveltime))^(3/2) # spreading factor
+    prefactor_const *= fontaine_SR_m0
+
+    return prefactor_const * dip_r
+end
+
+
+
+
 function dipole(b::Beam, Ip::Float64, s::Saddle) ### new 
  
-  traveltime = s.tr - s.ti
+  # traveltime = s.tr - s.ti
  
-  fontaine_SR_m0 = 1 / (kappa(Ip) * sqrt(2) * π)
+  # fontaine_SR_m0 = 1 / (kappa(Ip) * sqrt(2) * π)
 
-  prefactor = hessian_root(b, Ip, s) # corresponds to HessianRoot in RBSFA
-  prefactor *= (2*π/(im*traveltime))^(3/2) # spreading factor
-  prefactor *= fontaine_SR_m0
+  # prefactor = hessian_root(b, Ip, s) # corresponds to HessianRoot in RBSFA
+  # prefactor *= (2*π/(im*traveltime))^(3/2) # spreading factor
+  # prefactor *= fontaine_SR_m0
 
   # transpose(conj.(dip_i)) * E(s.ti) # fontaine
   # prefactor *= sum(dip_i .* E(s.ti))
 
-  amp = prefactor * dipole_SR_conj(s.p .+ A(b)(s.tr), Ip)
+  # amp = prefactor * dipole_SR_conj(s.p .+ A(b)(s.tr), Ip)
 
-  phase = S(b, Ip, s)
-  return amp .* exp(-im*phase) 
+  # pref = hhg_prefactor(b, s.ti, s.tr)
+  amp = hhg_prefactor(b, Ip, s.ti, s.tr) * hessian_root(b, Ip, s) # corresponds to HessianRoot in RBSFA
+
+  # phase = S(b, Ip, s)
+  return amp .* exp(-im * S(b, Ip, s)) 
 end
 
 
@@ -75,5 +98,16 @@ function harmonic_intensity(b::Beam, dip::AbstractVector{ComplexF64}, q::Number;
   end
   return sum((abs.(dip)).^2) * (q*fundamental_frequency(b))^4/(2*pi*c^3)
 end
+
+
+function harmonic_intensity(b::Beam, Ip::Float64, s::Saddle ; add_cc::Bool=false)
+  dip = dipole(b, Ip, s)
+
+  return harmonic_intensity(b, dip, s.q, add_cc = add_cc)
+end
+
+
+
+
 
 nothing

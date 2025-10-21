@@ -181,11 +181,14 @@ end
 
 
 
+##########
 
-
-
-
-
+function action_functions(beam, Ip, q)
+    f = (ti,tr) -> -1im*S(beam, Ip, ti, tr, q)
+    f_grad = (ti,tr) -> -1im.*[dS_dti(beam, Ip, ti, tr), dS_dtr(beam, Ip, q, ti, tr)]
+    f_hessian = (ti,tr) -> my_hessian(beam, Ip, q, ti, tr)
+    return f, f_grad, f_hessian
+end
 
 
 

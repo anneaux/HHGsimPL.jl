@@ -39,7 +39,7 @@ function cluster_ionisation_times(vals::Vector{T}) where T<:Real
 
     for (ci, c) in enumerate(centers)
         @assert (c>cent_prev) "the ionisationbursts are not in order!"
-
+        
         cent_prev = c
         data = vals[groupindices .== ci]
         push!(ionisationbursts_df, [ci, c, (minimum(data), maximum(data)), data ])
@@ -128,3 +128,5 @@ function get_ionisationburst_limits(beam::Beam, Ip::Number, q_values::Vector{T}=
         end
     end
 end
+
+nothing

@@ -282,7 +282,7 @@ end
 function flow_down!(triangles, points::Vector{PointA{T}},
         f::Function,
         f_grad::Function;
-        threshold::Real=0.5, # for normalisation of thr gradient
+        threshold::Real=0.5, # for normalisation of the gradient
         δ::Real=0.5, # flowstepfactor
         h_threshold::Real=-20.
         ) where T<:Number
@@ -347,3 +347,5 @@ function subdivide_triangles!(points, triangles, subdividethreshold)
         n_new = length(triangles)
     end
 end
+
+nothing

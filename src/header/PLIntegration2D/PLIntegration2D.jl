@@ -8,7 +8,7 @@
 using LinearAlgebra
 # using Integrals
 using FiniteDiff
-# using StaticArrays
+using StaticArrays
 using Contour
 # using Peaks
 # using LinearAlgebra
@@ -24,6 +24,11 @@ using Contour
 
 include("necklace-for-SA-thimble.jl")
 include("necklace-for-SD-thimble.jl")
+
+include("utils.jl")
+
+
+include("saddles-generic.jl")
 include("saddles-contributing.jl")
 include("saddle-point-method.jl")
 
