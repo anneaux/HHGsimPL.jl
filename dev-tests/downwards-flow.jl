@@ -336,7 +336,7 @@ function integrate_quadrilateral(b::Beam, Ip::Float64,
         y = x;
         sum = [0. + 0im, 0. + 0im]
         for i=1:n, j=1:n
-            jac = -jacobian([x[i], y[j]], p1, p2, p3, p4) # this minus sign here comes from that debuggin experiment in the 2024-10-20 figures spectra... NB
+            jac = -jacobian([x[i], y[j]], p1, p2, p3, p4) # this minus sign here comes from that debugging experiment in the 2024-10-20 figures spectra... NB
             
             ti,tr = map([x[i], x[j]], p1, p2, p3, p4)
             action = Sfunction([ti,tr])
@@ -450,9 +450,9 @@ function integrate_harmonic_dipole_fixed_N(beam::Beam, Ip::Float64,
     flowstepfactor::Float64 = 2., # flowstepfactor
     subdividethreshold::Float64 = 8., # subdivide threshold, wants to be 4 * δ
     h_threshold::Float64 = -150.,
-#     maxNsimplices::Int64=5000,
-#     integral_accuracy::Float64=1e-7,
-#     integral_rel_error::Float64=0.05,
+    #     maxNsimplices::Int64=5000,
+    #     integral_accuracy::Float64=1e-7,
+    #     integral_rel_error::Float64=0.05,
     print_message::Bool=true, 
     scaling_ν::Float64=1. # scaling factor "large parameter" for the integration
     )
@@ -460,7 +460,7 @@ function integrate_harmonic_dipole_fixed_N(beam::Beam, Ip::Float64,
     netsimplices = Vector{Int64}()
     (points, simplices) = initialise_grid(complex(timin),complex(timax),complex(ttmin),complex(ttmax), Δinit)
     overboard = false
-#     prev_integral = complex(ones(2))
+    #     prev_integral = complex(ones(2))
     int = complex(zeros(2))
 
 
@@ -475,7 +475,7 @@ function integrate_harmonic_dipole_fixed_N(beam::Beam, Ip::Float64,
         for quad in quads
             int += integrate_quadrilateral(beam, Ip, q, quad, scaling_ν=scaling_ν)
         end
-#         prev_integral = int
+    #         prev_integral = int
     end
 
     return int, length(simplices)
