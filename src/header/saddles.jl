@@ -165,10 +165,10 @@ function check_contribution(beam::Beam, Ip::Float64,
     ti::ComplexF64, tr::ComplexF64
     ; Ntimes::Int64 = 100, logerrors::Bool=false, kwargs...)
     
-    f = (ti,tr) -> -1im*S(beam, Ip, ti, tr, q)
-    f_grad = (ti,tr) -> -1im.*[dS_dti(beam, Ip, ti, tr), dS_dtr(beam, Ip, q, ti, tr)]
-    f_hessian = (ti,tr) -> my_hessian(beam, Ip, q, ti, tr)
-    
+    # f = (ti,tr) -> -1im*S(beam, Ip, ti, tr, q)
+    # f_grad = (ti,tr) -> -1im.*[dS_dti(beam, Ip, ti, tr), dS_dtr(beam, Ip, q, ti, tr)]
+    # f_hessian = (ti,tr) -> my_hessian(beam, Ip, q, ti, tr)
+    f, f_grad, f_hessian = action_functions(beam, Ip, q)
     
     check_contribution(f, f_grad, f_hessian, ti, tr; Ntimes=Ntimes, logerrors=logerrors, kwargs...)
 end

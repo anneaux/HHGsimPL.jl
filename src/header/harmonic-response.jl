@@ -62,8 +62,6 @@ function hhg_prefactor(b::Beam, Ip::Number, ti::ComplexF64,tr::ComplexF64)
 end
 
 
-
-
 function dipole(b::Beam, Ip::Float64, s::Saddle) ### new 
  
   # traveltime = s.tr - s.ti

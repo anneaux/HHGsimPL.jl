@@ -140,7 +140,7 @@ function get_SD_thimble_quadrangles(
     accuracy::Float64=1e-4,
     eigvecfactorinit::Float64 = 0.02, # I should come up with sophisticated guesses here.
     flowstepfactor::Float64 = 10., 
-    subdividethreshold::Float64 = 2.)
+    subdividethreshold::Float64 = 20.)
     
     ### check that Ninit ganzzahlig
     necklace = Vector{LineSeg}()
