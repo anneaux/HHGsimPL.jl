@@ -15,6 +15,7 @@ end
 PointA(x,y) = PointA(x,y,true);
 
 xy(p::PointA) = (p.x, p.y);
+Base.getindex(pa::PointA, i) = xy(pa)[i]
 
 dist(p1::PointA, p2::PointA) = norm([p1.x-p2.x, p1.y-p2.y])
 
@@ -184,21 +185,21 @@ end
 # triangle_area(points::AbstractVector{PointA}) = triangle_area([xy(p) for p in points])
 
 
-function integrate_triangle(points, triangle, integrand; order=1,dim=2)
-    int = zeros(ComplexF64,dim)
-    area = triangle_area_new(xy.(points[triangle.coord]))
-    wi = area/3
+# function integrate_triangle(points, triangle, integrand; order=1,dim=2)
+#     int = zeros(ComplexF64,dim)
+#     area = triangle_area_new(xy.(points[triangle.coord]))
+#     wi = area/3
 
-    v1,v2,v3 = triangle.coord
-    t_edges = [(v1,v2),(v2,v3),(v3,v1)] ### indices of the specific one I'm looking at
-    for k in t_edges
-        p1,p2 = points[[k...]]
-        ### is this fine or does this need to be done in the projection???
-        midpoint = ((p1.x+p2.x)/2, (p1.y+p2.y)/2) 
-        int .+= wi*integrand(midpoint...)
-    end    
-    return int
-end
+#     v1,v2,v3 = triangle.coord
+#     t_edges = [(v1,v2),(v2,v3),(v3,v1)] ### indices of the specific one I'm looking at
+#     for k in t_edges
+#         p1,p2 = points[[k...]]
+#         ### is this fine or does this need to be done in the projection???
+#         midpoint = ((p1.x+p2.x)/2, (p1.y+p2.y)/2) 
+#         int .+= wi*integrand(midpoint...)
+#     end    
+#     return int
+# end
 
 
 
