@@ -30,6 +30,19 @@ struct BeamOTC <: Beam
 		new(E01,E02,omega1,omega2,epsilon1,epsilon2,phi)
 	end
 
+	function BeamOTC(E01::Float64,
+		E02::Float64,
+		omega1::Float64,
+		omega2::Float64,
+		epsilon1::Float64,
+		epsilon2::Float64,
+		phi::Float64)
+		
+		new(E01,E02,omega1,omega2,epsilon1,epsilon2,phi)
+	end
+
+
+
 end
 
 # outer constructor for equal ellipticities
@@ -143,4 +156,13 @@ function electric_field_amplitude_derivative(b::BeamOTC)
    	((E01 * epsilon1 * cos(t * omega1)) / sqrt(term1) - (E02 * sin(phi + t * omega2)) / sqrt(term2))^2)
 
     return t -> (numerator(t) / denominator(t))
+end
+
+
+function get_Up(b::BeamOTC)
+	A01 = b.E01/b.omega1
+	A02 = b.E02/b.omega2
+	# println("Up = $(A01^2/4 + A02^2/4)")
+	Up = A01^2/4 + A02^2/4
+	return Up
 end
