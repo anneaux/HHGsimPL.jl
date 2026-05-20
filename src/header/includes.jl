@@ -1,6 +1,5 @@
-using Pkg
-Pkg.activate("..")
-
+# using Pkg
+# Pkg.activate("..")
 
 
 using Sobol
@@ -16,17 +15,18 @@ using LinearAlgebra
 
 
 include("constants-units.jl")
+include("beams.jl")
 #include("utils.jl")
 
-include("beams.jl")
 include("saddles.jl")
 
-include("Beams/BeamMono.jl")
-include("Beams/BeamTC.jl")
-include("Beams/BeamOTC.jl")
-
+# include("Beams/BeamMono.jl")
+# include("Beams/BeamTC.jl")
+# include("Beams/BeamOTC.jl")
 
 include("equations.jl")
+include("ionisationbursts.jl")
 include("harmonic-response.jl")
 include("stokes-and-cutoffs.jl")
-include("ionisationbursts.jl")
+
+nothing

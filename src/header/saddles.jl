@@ -22,6 +22,10 @@ function /(s::Saddle, TC::Real)
     return Saddle(s.q, s.ti/TC, s.tr/TC, s.p)
 end
 
+import Base.+
++(s::Saddle, t::Number) = Saddle(s.q, s.ti+t, s.tr+t, s.p)
+
+
 function traveltime(s::Saddle)
     return s.tr-s.ti
 end

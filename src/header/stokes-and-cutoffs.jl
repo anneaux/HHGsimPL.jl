@@ -124,3 +124,5 @@ function find_thcs_sobol(b::Beam, Ip::Real,
     sort!(thc_array, by= x -> real(x.tihc))
     return thc_array
 end;
+
+nothing
