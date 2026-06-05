@@ -7,8 +7,6 @@ using .MeanShiftClustering
 
 # requires HHGsimPL.jl but I don't know how to do that
 
-
-
 function cluster_ionisation_times(vals::Vector{T}) where T<:Real
 #     vals = test_x
     msr = MeanShiftClustering.meanshift(vals)

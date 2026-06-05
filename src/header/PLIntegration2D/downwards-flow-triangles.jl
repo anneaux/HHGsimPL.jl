@@ -639,12 +639,4 @@ function get_SD_thimble_triangles(
 end
 
 
-
-
-
-
-
-
-
-
 nothing

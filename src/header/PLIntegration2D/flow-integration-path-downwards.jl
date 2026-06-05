@@ -144,7 +144,32 @@ function subdivide(points::Vector{Point{T}}, simplices::Vector{Index}, Δ::Float
 end
 
 
-function initialise_grid(t1min::ComplexF64, t1max::ComplexF64,
+# function initialise_grid(t1min::ComplexF64, t1max::ComplexF64,
+#  t2min::ComplexF64, t2max::ComplexF64,
+#  Δ::Float64, flow_bounds=[true, true, true, true])
+#     points = [
+#         Point(t1min, t2min, flow_bounds[1]), 
+#         Point(t1min, t2max, flow_bounds[2]), 
+#         Point(t1max, t2max, flow_bounds[3]),
+#         Point(t1max, t2min, flow_bounds[4])]  
+
+
+#     simplices = [Index([1,2,3,4])]
+    
+#     ###     subdivide_2(points, simplices, Δ) # instead of calling this I'll do it here directly
+#     n_old = length(simplices)
+#     n_new = 0 #n_old - 1
+    
+#     while (n_old != n_new)
+#         n_old = n_new
+#         subdivide_simplices!(points, simplices, Δ, n_new == 0)
+#         filter!(sim->sim.active, simplices)
+#         n_new = length(simplices)
+#     end    
+#     return (points, simplices)
+# end
+
+function initialise_grid_rectangle(t1min::ComplexF64, t1max::ComplexF64,
  t2min::ComplexF64, t2max::ComplexF64,
  Δ::Float64, flow_bounds=[true, true, true, true])
     points = [
@@ -152,6 +177,31 @@ function initialise_grid(t1min::ComplexF64, t1max::ComplexF64,
         Point(t1min, t2max, flow_bounds[2]), 
         Point(t1max, t2max, flow_bounds[3]),
         Point(t1max, t2min, flow_bounds[4])]  
+
+
+    simplices = [Index([1,2,3,4])]
+    
+    ###     subdivide_2(points, simplices, Δ) # instead of calling this I'll do it here directly
+    n_old = length(simplices)
+    n_new = 0 #n_old - 1
+    
+    while (n_old != n_new)
+        n_old = n_new
+        subdivide_simplices!(points, simplices, Δ, n_new == 0)
+        filter!(sim->sim.active, simplices)
+        n_new = length(simplices)
+    end    
+    return (points, simplices)
+end
+
+function initialise_grid_parallelogram(timin::ComplexF64, timax::ComplexF64,
+ ttmin::ComplexF64, ttmax::ComplexF64,
+ Δ::Float64, flow_bounds=[true, true, true, true])
+    points = [
+        Point(timin, timin+ttmin, flow_bounds[1]), 
+        Point(timin, timin+ttmax, flow_bounds[2]), 
+        Point(timax, timax+ttmax, flow_bounds[3]),
+        Point(timax, timax+ttmin, flow_bounds[4])]  
 
 
     simplices = [Index([1,2,3,4])]
@@ -241,7 +291,7 @@ function get_simplices(
     )
 
     netsimplices = Vector{Int64}()
-    (points, simplices) = initialise_grid(complex(t1min),complex(t1max),complex(t2min),complex(t2max), Δinit, flow_bounds)
+    (points, simplices) = initialise_grid_parallelogram(complex(t1min),complex(t1max),complex(t2min),complex(t2max), Δinit, flow_bounds)
     overboard = false
     push!(netsimplices, length(simplices))
     for i_flow in 1:Nflow
@@ -347,7 +397,7 @@ function integrate_flowed_path(
     )
 
     netsimplices = Vector{Int64}()
-    (points, simplices) = initialise_grid(complex(timin), complex(timax), complex(ttmin), complex(ttmax), Δinit)
+    (points, simplices) = initialise_grid_parallelogram(complex(timin), complex(timax), complex(ttmin), complex(ttmax), Δinit)
     overboard = false
     prev_integral = complex(ones(2))
     int = complex(zeros(2))
