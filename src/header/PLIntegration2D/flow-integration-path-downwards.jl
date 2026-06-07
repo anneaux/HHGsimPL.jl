@@ -466,4 +466,68 @@ function integrate_flowed_path(
     return int,length(simplices)
 end
 
+function integrate_flowed_path_fixed_Nflow(
+    f::Function,
+    f_grad::Function,
+    timin::Number, timax::Number,
+    ttmin::Number, ttmax::Number;
+    prefactor::Function = (ti,tr) -> ones(2),
+    Nflow::Int64=50,
+    Δinit::Float64 = 10.,
+    gradnthreshold::Float64 = 0.5, # grad normalisation threshold
+    flowstepfactor::Float64 = 2., # flowstepfactor
+    subdividethreshold::Float64 = 8., # subdivide threshold, wants to be 4 * δ
+    h_threshold::Float64 = -150.,
+    maxNsimplices::Int64=5000,
+    print_message::Bool=true
+    )
+
+    netsimplices = Vector{Int64}()
+    (points, simplices) = initialise_grid_parallelogram(complex(timin), complex(timax), complex(ttmin), complex(ttmax), Δinit)
+    int = complex(zeros(2))
+
+
+    for i_flow in 1:Nflow
+        nsimplices = length(simplices)
+
+        flow_down!(simplices, points, f, f_grad,
+                threshold = gradnthreshold, δ=flowstepfactor, h_threshold = h_threshold)
+        subdivide(points, simplices, subdividethreshold)
+        quads =  [Quadrilateral(points[sim.coord]) for sim in simplices]
+        int = complex(zeros(2))
+        for quad in quads
+            int += integrate_quadrilateral(f, quad, prefactor = prefactor)
+        end
+
+        if isempty(findall(sim->sim.active, simplices))
+            println("I broke because I ran out of simplices after $i_flow steps. This might be solved by using a lower h_threshold."); break
+        end
+
+        
+        if length(simplices) > maxNsimplices 
+            print_message ? println("I broke after $i_flow steps because I have more than $maxNsimplices simplices now.") : nothing
+            break
+        end        
+
+    end
+
+    return int,length(simplices)
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 nothing
