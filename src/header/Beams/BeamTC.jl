@@ -264,3 +264,5 @@ function get_Up(b::BeamTC)
 	Up = A01^2/4 + A02^2/4
 	return Up
 end
+
+nothing

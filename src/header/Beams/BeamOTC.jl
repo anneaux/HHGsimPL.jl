@@ -166,3 +166,5 @@ function get_Up(b::BeamOTC)
 	Up = sum(A01.^2)/4 + sum(A02.^2)/4
 	return Up
 end
+
+nothing
